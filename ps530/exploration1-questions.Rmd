@@ -1,0 +1,82 @@
+---
+title: "exploration1-questions"
+author: "Duu Renn"
+date: "August 29, 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+opts_chunk$set(
+  tidy=TRUE,     # display code as typed # Changed to true because my comments are too long
+  tidy.opts=list(width.cutoff=75),
+  size="small",    # slightly smaller font for code
+  echo=TRUE,
+  results='markup',
+  strip.white=TRUE,
+  fig.path='figs/fig',
+  cache=FALSE,
+  highlight=TRUE,
+  width.cutoff=132, 
+  size='footnotesize',
+  out.width='.9\\textwidth',
+  fig.retina=FALSE,
+  message=FALSE,
+  comment=NA)
+```
+
+# Questions
+As people ask questions, I'll post responses here and push them to the shared folder. You can email me these questions or create an "issue" in the 'uips-stat-share' repository. Note that this is different than the 'explorations' repository -- we should probably try to keep that relatively clutter-free.  
+
+### Windsorize (Fabian)
+Q: "Hi. I'm working with Hye Soo, and we get stuck on figuring out where the highest value from winsorize(hlp) (3.965) comes. We read about it, and we tried to calculate it but we couldn't understand how it was calculated."
+
+```{r source-530-exploration1, include=F}
+tempR <- tempfile(fileext = ".R")
+require(knitr)
+purl("C:/Users/duu/OneDrive/School/gradstats/uips-stat-share/ps530/exploration1.Rmd", output=tempR)
+source(tempR)
+unlink(tempR)
+```
+
+First off, it's good that you read about the winsorize() command. Did you look in the [documentation of robustHD](https://cran.r-project.org/web/packages/robustHD/robustHD.pdf) or somewhere else? Remember, if you use online resources please put them in your response.  
+
+Anyways, let me first look the result.
+
+```{r}
+winsorize(hlp)[1:10]
+```
+
+You report one number as a result, but clearly that isn't the case here. I include only the first 10 of what would have been 797 results. I think you meant this:  
+
+```{r}
+mean(winsorize(hlp))
+```
+
+But even here, I receive a different result. Why is that?  
+
+Anyways, I suggest looking at the documentation and running your code again (all of it, probably) to see if your result (3.9) is actually what you're supposed to get. Maybe it's an issue with my version of the code and data -- who knows. (You can know if you want, as my code is all online now.)  
+
+When you find out if the result is accurate, consider the following. Remember, this is a computational stats approach, not purely mathematical. So you may want to try to simulate things. Maybe helpful, maybe not.  
+
+```{r}
+set.seed(0123)
+uni <- rnorm(1000)
+hist(uni)
+sd(uni)
+mean(uni)
+mean(uni)
+```
+
+```{r, fig.show='asis'}
+set.seed(0123)
+skew <- rnbinom(999, 5, .7)
+skew_outlier <- append(160, skew)
+hist(skew_outlier,breaks = 100)
+sd(skew_outlier)
+mean(skew_outlier)
+mean(winsorize(skew_outlier))
+```
+
+
+
