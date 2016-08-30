@@ -6,10 +6,10 @@ For example:
 - Want to add a resource? Submit a pull request!
 
 ## PS530 - Quant I
-
+[Explorations for PS530](ps530/) - Find a copy of the exploration, comments, and other resources here.  
 
 ## PS531 - Quant II
-
+[Explorations for PS531](ps531/) - Find a copy of the exploration, comments, and other resources here.  
 
 ## Workshops and Tutorials
 Aug 26 - Basic Markdown for reproducible research and using git for classwork and assignments  
