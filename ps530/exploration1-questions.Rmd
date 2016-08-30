@@ -78,5 +78,43 @@ mean(skew_outlier)
 mean(winsorize(skew_outlier))
 ```
 
+## How to visualize
+Well, you could use R's hist() function, like we did in the chunk above with the made up date. 
+```{r}
+hist(ho05$hlphrs)
+```
+
+But the amount of information conveyed by a plot really matters about design decisions. That is, visualization of data requires that you make decisions (or accept the default options).
+
+
+```{r}
+hist(ho05$hlphrs, breaks = 100)
+```
+
+And of course, we could do some simple things like add color: 
+
+```{r, warning = T, message=T}
+require(ggplot2)
+ggplot(ho05, aes(x=hlphrs)) +
+ geom_histogram()
+```
+
+Notice that the function actually suggests that you pick a better bin width, which is a little different (though not too difficult) in ggplot.
+
+```{r}
+ggplot(ho05, aes(x=hlphrs)) +
+ geom_histogram(binwidth = 1)
+```
+
+In substantive terms, what is the bin width mean for our interpretation of the histogram?  
+
+Also, we can preview some other things too:  
+
+```{r}
+ggplot(subset(ho05, !is.na(hlphrs)), aes(x=hlphrs)) +
+  geom_histogram(binwidth = 2) +
+  facet_grid(postbomb~Rsex)
+```
+
 
 
