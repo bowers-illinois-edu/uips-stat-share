@@ -1,0 +1,151 @@
+---
+title: "Descriptive Statistics"
+author: "Jason Renn"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  ioslides_presentation:
+    widescreen: yes
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+opts_chunk$set(
+  tidy=TRUE,     # display code as typed # Changed to true because my comments are too long
+  tidy.opts=list(width.cutoff=75),
+  size="small",    # slightly smaller font for code
+  echo=TRUE,
+  results='markup',
+  strip.white=TRUE,
+  fig.path='figs/fig',
+  cache=FALSE,
+  highlight=TRUE,
+  width.cutoff=132, 
+  size='footnotesize',
+  out.width='.9\\textwidth',
+  fig.retina=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment=NA)
+```
+
+## The AMERICAN NATIONAL ELECTION STUDIES (ANES)
+The [ANES](http://www.electionstudies.org/) is a survey that covers voting behavior, public opinion, and political participation. While the primary mission of the ANES is to answer questions about voting behavior, the wealth of variables contained in the survey mean that we can use these data to answer other questions too.  
+
+Today's question: __How have the attitudes of Americans changed towards gays and lesbians over time?__  
+
+## Description and Comparison Across Groups
+We will use some basic descriptive statistics in today's class. Remember that after generating a number or creating a figure, you must discuss and describe it. We will do the following:  
+
+- Using two American National Election Studies, from two different years, characterize the attitudes of all Americans toward gays and lesbians.  
+- Plot the distribution of attitudes for each year separately.  Has the distribution changed from one year to the other?  
+- Use measures of central tendency and measures of dispersion to characterize each distribution.  More importantly, use them to characterize any changes in the distribution from one time to the other.  
+- Then do the same for Whites and African Americans separately.
+
+
+
+## The Data
+The ANES dataset contains hundred of variables. We are only interested in a few today. If you would like to know about the other variables contained inthe ANES, read the [codebook](http://www.electionstudies.org/studypages/anes_timeseries_cdf/anes_timeseries_cdf_codebook_var.pdf).  
+
+This version of the ANES includes multiple waves or years. We will look at two sets of years, 2004 and 2008.  
+
+## Variables of Interest
+- Feeling thermometer for attitude toward Gays and Lesbians (_VCF0232_)
+- Year of survey (_VCF0004_)
+- Race-ethnicity of the respondent (_VCF0105b_)
+
+```{r, echo = F}
+anes <- readRDS("C:/Users/duurenn2/Desktop/Dropbox/Graduate School/Fall 2016/uips-stat-share/workshops-tutorials/descriptive-statistics/anes-data.RData")
+
+anes <- anes[(which(anes$VCF0004 %in% c(1988,2008))),]
+```
+
+## Feeling Thermometer Question for Gays and Lesbians
+Some questions on the ANES are what we refer to as "feeling thermometer" questions. The answer to these questions produce a number from 0 to 100, with higher values corresponding to a "warmer" or more favorable view. Here is the wording used to explain the question to survey respondents.  
+
+_"I'd like to get your feelings toward some of our political leaders and other people who are in the
+news these days. I'll read the name of a person and I'd like you to rate that person using 
+something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees
+mean that you feel favorable and warm toward the person. Ratings between 0 degrees and 50
+degrees mean that you don't feel favorable toward the person and that you don't care too
+much for that person. You would rate the person at the 50 degree mark if you don't feel particularly
+warm or cold toward the person. If we come to a person whose name you don't 
+recognize, you don't need to rate that person. Just tell me and we'll move on to the next one."_
+
+## Ethnicity-Race
+- 4 categories
+```{r}
+# drop non-black
+```
+
+
+## Religiosity 
+Question:  
+Responses:  
+
+```{r}
+
+```
+
+
+## Description: Attitudes over Time
+```{r}
+# All Years
+with(anes, summary(VCF0232))
+with(anes, boxplot(VCF0232))
+with(anes, hist(VCF0232))
+
+# Separate Years
+with(subset(anes, VCF0004==1988), summary(VCF0232))
+with(subset(anes, VCF0004==2008), summary(VCF0232))
+
+# Boxplot
+require(ggplot2)
+ggplot(anes, aes(as.factor(VCF0004), VCF0232)) +
+  geom_boxplot() + 
+  ylab("Gay/Lesbian Feeling Thermometer") + 
+  xlab("Year")
+
+# Hist
+ggplot(anes, aes(color=as.factor(VCF0004), fill=as.factor(VCF0004),VCF0232)) +
+  geom_density(alpha = 0.1)
+
+ggplot(anes,aes(x=VCF0232,fill=as.factor(VCF0004)))+
+  geom_histogram(aes(y=0.5*..density..),
+                 alpha=0.5,position='identity',binwidth=10)
+```
+
+## Description: Attitudes by Ethnicity
+```{r}
+# All Ethnic Groups
+with(anes, summary(VCF0232))
+with(anes, boxplot(VCF0232))
+with(anes, hist(VCF0232))
+
+# Separate Ethnic Groups
+with(subset(anes, anes$VCF0105B=="(1) 1. White non-Hispanic"), summary(VCF0232))
+with(subset(anes, anes$VCF0105B=="(2) 2. Black non-Hispanic"), summary(VCF0232))
+
+# Boxplot
+require(ggplot2)
+ggplot(anes, aes(as.factor(VCF0105B), VCF0232)) +
+  geom_boxplot() + 
+  ylab("Gay/Lesbian Feeling Thermometer") + 
+  xlab("Year")
+
+# Histogram
+with(subset(anes, VCF0105B=="(1) 1. White non-Hispanic"), hist(VCF0232))
+with(subset(anes, VCF0105B=="(2) 2. Black non-Hispanic"), hist(VCF0232))
+
+ggplot(anes,aes(x=VCF0232,fill=as.factor(VCF0105B)))+
+  geom_histogram(aes(y=0.5*..density..),
+                 alpha=0.5,position='identity',binwidth=10)
+
+# ggplot(anes,aes(x=VCF0232,fill=as.factor(VCF0105B)))+
+#   geom_histogram(aes(y=0.5*..density..),binwidth=0.5)+
+#   facet_wrap(~as.factor(VCF0105B),nrow=4)
+
+# Density
+ggplot(anes, aes(color=as.factor(VCF0105B), fill=as.factor(VCF0105B),VCF0232)) +
+  geom_density(alpha = 0.1)
+```
+
