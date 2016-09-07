@@ -1,7 +1,7 @@
 ---
-title: "exploration1-questions"
+title: "exploration2-questions"
 author: "Duu Renn"
-date: "August 29, 2016"
+date: "September 2, 2016"
 output: 
   pdf_document: 
     number_sections: yes
@@ -16,7 +16,9 @@ output:
 ```{r source-530-exploration2, include=F}
 tempR <- tempfile(fileext = ".R")
 require(knitr)
-purl("C:/Users/duu/OneDrive/School/gradstats/uips-stat-share/ps530/exploration2.Rmd", output=tempR)
+# Let's make our paths work within the working directory for any machine
+RPROJ <- list(PROJHOME = normalizePath(getwd()))
+purl(file.path(PROJHOME, "ps530", "exploration2.Rmd"), output=tempR)
 source(tempR)
 unlink(tempR)
 

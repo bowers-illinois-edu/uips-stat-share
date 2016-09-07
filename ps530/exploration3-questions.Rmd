@@ -1,0 +1,61 @@
+---
+title: "exploration3-questions"
+author: "Duu Renn"
+date: "September 9, 2016"
+output: 
+  pdf_document: 
+    number_sections: yes
+    toc: yes
+---
+
+
+------------
+
+\vspace{3cm}
+
+```{r source-530-exploration3, include=F}
+tempR <- tempfile(fileext = ".R")
+require(knitr)
+# Let's make our paths work within the working directory for any machine
+PROJHOME = normalizePath(getwd())
+# purl(file.path(PROJHOME, "ps530", "exploration3.Rmd"), output=tempR) # Nope, it's broken
+purl("C:/Users/duurenn2/Desktop/Dropbox/Graduate School/Fall 2016/uips-stat-share/ps530/exploration3.Rmd", output=tempR)
+source(tempR)
+unlink(tempR)
+```
+
+
+```{r setup-top-level, include=F}
+require(knitr)
+opts_chunk$set(
+  tidy=TRUE,     # display code as typed # Changed to true because my comments are too long
+  tidy.opts=list(width.cutoff=75),
+  size="small",    # slightly smaller font for code
+  echo=TRUE,
+  results='markup',
+  strip.white=TRUE,
+  fig.path='figs/fig',
+  cache=FALSE,
+  highlight=TRUE,
+  width.cutoff=132, 
+  size='footnotesize',
+  out.width='.9\\textwidth',
+  fig.retina=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment=NA)
+```
+
+```{r packages, include=F}
+# install.packages(c("devtools", "knitcitations"))
+require(knitcitations)
+cleanbib()
+options("citations_format" = "pandoc")
+```
+
+__Questions__  
+As people ask questions, I'll post responses here and push them to the shared folder. You can email me these questions or create an "issue" in the 'uips-stat-share' repository. Note that this is different than the 'explorations' repository -- we should probably try to keep that relatively clutter-free.  
+
+# Readings
+Before considering non-linear relationships, make sure that you have a good understanding of linear relationships and specifically how OLS fits its line. A closer reading (and practice) with the _Kaplan_ and _James et al_ textbooks should be useful here. Chapter 3 and the "Lab" section of the _James et al_ book should be especially helpful, as it also includes some topics that are useful for this week.  
+
