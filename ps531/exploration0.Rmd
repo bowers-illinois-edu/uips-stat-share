@@ -132,6 +132,10 @@ Why use averages anyway? What is going on here?"
 ```{r}
 effectlm<-lm(hlphrs~postbomb,data=wrkdat) ## the linear model
 coef(effectlm) ## coefficients
+
+# First interpret
+
+# Then see diff of means
 ```
 
 She continues, "One of my subordinate always brags about his statistics
@@ -140,6 +144,10 @@ this number, he said, `Well, you can't trust this coefficient because your
 dependent variable is not Normal.' I didn't understand and so, the next day I
 asked my main analyst to explain. She didn't get a chance to explain but the
 agents recovered this from her computer:"
+
+<!-- 
+It's not the DV's distribution that's important, but the errors. So we should look at a plot of the residuals.
+-->
 
 
 ```{r, eval = F}
@@ -151,6 +159,11 @@ rug(wrkdat$hlphrs)
 
 "Why would the analyst or those managing her as an asset want to know about
 the distribution of voluntarism?"
+
+<!-- 
+It's useful to know and can indicate something about errors, especially when there are influential points, but
+alone it does not answer the question of whether you should believe the estimate.  
+-->
 
 You ask, "What do you mean...`those managing her as an asset'?"
 
@@ -172,24 +185,50 @@ effects?"
 require(quantreg)
 effectRq<-rq(hlphrs~postbomb,data=wrkdat,tau=.5) # tau=.5 is middle quantile
 coef(effectRq) ## coefficients
+
+summary(effectRq)
+
+
+# Look up quant reg and describe the difference. 
+# Then try to interpret the results. 
+# How else might you do this? 
+with(subset(wrkdat, postbomb==1), median(hlphrs))
+with(subset(wrkdat, postbomb==0), median(hlphrs))
+
+# Change tau. See what happens?  
 ```
+
+<!-- How does this comment address the normalality concern? 
+
+The DV is influenced too much by high values so we may over-estimate the size of the effect. We can look at the median (as that is not outlier-influenced) and see that the difference in medians is small, only 1 hr.  The effect size is small - concern that we had biased coef.  
+-->
 
 "Here is the code from Analyst 2: What is she doing? Why? What do her comments
 about a `CLT' mean?"
 
 ```{r}
 permuteFn<-function(y){
-  shuffledBombing<-sample(wrkdat$postbomb)
-  meandiff<-coef(lm(y~shuffledBombing))[["shuffledBombing"]]
+  shuffledBombing<-sample(wrkdat$postbomb) # What is it sampling? 
+  meandiff<-coef(lm(y~shuffledBombing))[["shuffledBombing"]] # break down this line
   return(meandiff)
 }
+
+# Some of you said this was a bootstrap, and it isn't.  
+# The CLT here is creating the permuted relationship/null
 ```
 
 ```{r, cache=T}
 set.seed(20150101)
-results<-replicate(10000,permuteFn(y=wrkdat$hlphrs))
-mean(results)
+results<-replicate(10000,permuteFn(y=wrkdat$hlphrs)) # What's this doing? 
+mean(results) # okay, so interpret the number
 
+# Maybe look at the distribution
+hist(results)
+# And compare it to the observed lm coef to find something out
+sum(results>coef(effectlm))/length(results)
+# What's that mean?  
+
+# Actually, I'm not seeing anything about the CLT? Don't understand, ask a question.  
 ```
 
 ```{r, fig.width=8, fig.height=4, out.width=".5\\textwidth", message=T, warning=T, eval = F}
@@ -197,21 +236,31 @@ par(mfrow=c(1,2),oma=rep(0,4),mgp=c(1.5,.5,0),pty="s")
 plot(density(results/sd(results)),xlab="Mean Diffs")
 curve(dnorm(x,sd=1,mean=0),from=-4,to=4,col="blue",add=TRUE) ## CLT ok.
 obscoef<-coef(effectlm)[[2]]
-rug(obscoef,lwd=3,ticksize=.5)
+rug(obscoef,lwd=3,ticksize=.5) # So we saw this above in a number
 
 qqnorm(results/sd(results))
 qqline(results/sd(results))
+
+qqnorm(effectlm$residuals)
+qqline(effectlm$residuals) # Say something!
+# The permutation 
 ```
+
 
 ```{r, eval = F}
 pnorm(obscoef,sd=1,mean=0,lower.tail=FALSE) # p-value
 2*(min( c( pnorm(obscoef,sd=1,mean=0),1-pnorm(obscoef,sd=1,mean=0) )))
-summary(effectlm)$coef[2,c(1,4)]
-
+summary(effectlm)$coef[2,c(1,4)] # per-based CI
 ```
 
 "Thanks so much for all of your help! Now I do see that the mention of
-`Normal' referred to two different problems. Now I have one last question:  "I
+`Normal' referred to two different problems. 
+
+<!--
+Yeah
+-->
+
+Now I have one last question:  "I
 also asked my analyst to tell me how people in London acted compared to people
 in other parts of the UK. After all, the bombings occurred in London. But I
 got more crazy coefficients. Can you help? Can you show me how to get these
@@ -222,7 +271,13 @@ wrkdat$london<-factor(wrkdat$GOR=="London",labels=c("Not London","London"))
 ## test the recode
 with(wrkdat,table(london,GOR=="London",useNA="ifany"))
 
+## check coverage for interaction terms
+with(wrkdat,table(london, postbomb, exclude = NULL))
+
 effectsBySubGroupsLm<-lm(hlphrs~london*postbomb,data=wrkdat)
 coef(effectsBySubGroupsLm)
 ```
+
+<!-- do some more means
+-->
 

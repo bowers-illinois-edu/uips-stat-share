@@ -2,7 +2,10 @@
 title: "exploration1-questions"
 author: "Duu Renn"
 date: "August 29, 2016"
-output: pdf_document
+output: 
+  pdf_document: 
+    number_sections: yes
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -25,14 +28,21 @@ opts_chunk$set(
   comment=NA)
 ```
 
-# Questions
-As people ask questions, I'll post responses here and push them to the shared folder. You can email me these questions or create an "issue" in the 'uips-stat-share' repository. Note that this is different than the 'explorations' repository -- we should probably try to keep that relatively clutter-free.  
 
-```{r source-530-exploration1, include=F}
+```{r source-531-exploration1, include=F}
 tempR <- tempfile(fileext = ".R")
 require(knitr)
 purl("C:/Users/duu/OneDrive/School/gradstats/uips-stat-share/ps531/exploration1.Rmd", output=tempR)
 source(tempR)
 unlink(tempR)
 ```
-# 
+
+# Questions
+As people ask questions, I'll post responses here and push them to the shared folder. You can email me these questions or create an "issue" in the 'uips-stat-share' repository. Note that this is different than the 'explorations' repository -- we should probably try to keep that relatively clutter-free.  
+
+##
+
+
+
+
+

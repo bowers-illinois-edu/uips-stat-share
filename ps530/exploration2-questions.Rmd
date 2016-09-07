@@ -1,0 +1,135 @@
+---
+title: "exploration1-questions"
+author: "Duu Renn"
+date: "August 29, 2016"
+output: 
+  pdf_document: 
+    number_sections: yes
+    toc: yes
+---
+
+
+------------
+
+\vspace{3cm}
+
+```{r source-530-exploration2, include=F}
+tempR <- tempfile(fileext = ".R")
+require(knitr)
+purl("C:/Users/duu/OneDrive/School/gradstats/uips-stat-share/ps530/exploration2.Rmd", output=tempR)
+source(tempR)
+unlink(tempR)
+
+# purl("C:/Users/duu/OneDrive/School/gradstats/uips-stat-share/ps531/exploration1.Rmd", output=tempR)
+# source(tempR)
+# unlink(tempR)
+
+load(url("http://jakebowers.org/Data/ho05.rda"))
+wrkdat<-ho05[!is.na(ho05$hlphrs)&ho05$Rage!=0,] ## removing bad obs
+effect1<-coef(lm(hlphrs~postbomb,data=wrkdat))[["postbomb"]]
+effect1
+
+covariatesLabels <- c( "GOR" = "Government Office Region",
+		      "Rsex" = "Gender",
+		      "Rdmstat" = "Respondent de facto marital status",
+		      "Rage" = "Age",
+		      "Ethnic11" = "Ethnicity",
+		      "RILO4A" = "Economic Status",
+		      "hhinc" = "Household Income",
+		      "ZQuals1" = "Highest qualification: includes 70+ (???)",
+		      "DVHSize" = "Number of people in household",
+		      "immigrant" = "Immigrant",
+		      "workstatus" = "Employment status",
+		      "SLive" = "Years lived in neighborhood",
+		      "relig.and.act" = "Interaction of religion and practicing questions",
+		      "Rnssec17" = "NSSec grouped into 17 categories (???)",
+		      "HTen1" = "Owns or rents",
+		      "Rage5cat" = "5 level categorical variable for age",
+		      "hhinc5cat" = "5 level cateogrical variable for household income",
+		      "DVHSizeCat" = "Categorical coding of household size: 1, 2, 3, or 4+" ,
+		      "SLive5cat" = "5 level cateogrical variable for years lived in neighborhood")
+
+covariates <- names(covariatesLabels)
+```
+
+
+```{r setup-b, include=FALSE}
+require(knitr)
+opts_chunk$set(
+  tidy=TRUE,     # display code as typed # Changed to true because my comments are too long
+  tidy.opts=list(width.cutoff=75),
+  size="small",    # slightly smaller font for code
+  echo=TRUE,
+  results='markup',
+  strip.white=TRUE,
+  fig.path='figs/fig',
+  cache=FALSE,
+  highlight=TRUE,
+  width.cutoff=132, 
+  size='footnotesize',
+  out.width='.9\\textwidth',
+  fig.retina=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  comment=NA)
+```
+
+
+
+__Questions__  
+As people ask questions, I'll post responses here and push them to the shared folder. You can email me these questions or create an "issue" in the 'uips-stat-share' repository. Note that this is different than the 'explorations' repository -- we should probably try to keep that relatively clutter-free.  
+
+# Data and Description
+In the previous assignment, there were missing values which corresponded to an "NA" observation. Are there any such values in this dataset? Are you sure?  
+
+Make sure you explore the codebook!  
+
+Note that you're engaging in description of data. While discussion of significance is unnecessary, discussion of the variables is crucial -- especially when it comes to coverage and content.  
+
+# Plots
+One thing that you'll want to include are plots of the data. It's up to you to interpret these and make decisions about the actual variables (this is a purposely vague statement). I'm just going to include another ggplot example if you decide to use that package instead of R's built in plot() command. Note that this example isn't even the dataset that you're working on this week, so it really is up to you to design your own figure.
+
+```{r ggplot-example1}
+require(ggplot2)
+
+ggplot(ho05, aes(hhinc, SLive)) + 
+  geom_point()
+
+# Notice that this is missing some crucial things, like labels for X and Y as well as a title
+```
+
+You can introduce more "layers" to your visual depictions of the data, even just in X-Y plot. But make sure you choose the right type of variable.  
+
+```{r ggplot-example2, fig.width=6, fig.height=3}
+ggplot(ho05, aes(hhinc, SLive, shape=as.factor(postbomb))) + 
+  geom_point()
+
+# Or perhaps easier to distinguish
+ggplot(ho05, aes(jitter(hhinc), jitter(SLive), color=as.factor(postbomb))) + 
+  geom_point(size=3, alpha=.5)
+
+# But this would be bad
+ggplot(ho05, aes(jitter(hhinc), jitter(SLive), color=as.factor(Rage))) + 
+  geom_point(size=3, alpha=.5)
+
+# Maybe a little better, but at some point your graphic is not informative. Choose wisely
+ggplot(ho05, aes(jitter(hhinc), jitter(SLive))) + 
+  geom_point(size=(ho05$Rage^2)/1000, alpha=.5, shape=as.factor(ho05$postbomb))
+
+```
+
+
+
+```{r, eval = F, include=F}
+## Tonga Trench Earthquakes
+coplot(lat ~ long | depth, data = quakes)
+given.depth <- co.intervals(quakes$depth, number = 4, overlap = .1)
+coplot(lat ~ long | depth, data = quakes, given.v = given.depth, rows = 1)
+```
+
+
+
+
+
+# Regression already?
+Well, you'll definitely see more of it but if you're having trouble right now remember that both Kaplan and the James et al readings have a lot of material have a lot of examples with code _and_ interpretation. Don't negelct the latter.  

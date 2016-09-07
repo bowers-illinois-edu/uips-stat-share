@@ -1,23 +1,21 @@
 ---
 title: 'Exploration 1: Description in One Dimension'
-author: 'Jake Bowers'
+author: "Jason Renn"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
-bibliography: classbib.bib
-fontsize: 10pt
-geometry: margin=1in
-mainfont: "Minion Pro"
-graphics: yes
 output:
+  pdf_document:
+    toc: yes
   html_document:
     fig_caption: yes
     fig_height: 4
     fig_width: 4
-  pdf_document:
-    latex_engine: xelatex
-    graphics: yes
-    fig_caption: yes
-    fig_height: 4
-    fig_width: 4
+    number_sections: yes
+    toc: yes
+geometry: margin=1in
+graphics: yes
+mainfont: Minion Pro
+fontsize: 10pt
+bibliography: classbib.bib
 ---
 
 <!-- Make this document using library(rmarkdown); render("exploration1.Rmd") -->
@@ -36,7 +34,8 @@ output:
 
 require(knitr)
 opts_chunk$set(
-  tidy=FALSE,     # display code as typed
+  tidy=TRUE,     # display code as typed # Changed to true because my comments are too long
+  tidy.opts=list(width.cutoff=75),
   size="small",    # slightly smaller font for code
   echo=TRUE,
   results='markup',
@@ -44,12 +43,17 @@ opts_chunk$set(
   fig.path='figs/fig',
   cache=FALSE,
   highlight=TRUE,
-  width.cutoff=132,
+  width.cutoff=132, 
   size='footnotesize',
   out.width='.9\\textwidth',
   fig.retina=FALSE,
   message=FALSE,
   comment=NA)
+
+# Packages with errors
+# install.packages("psych", "robustHD")
+require(psych)
+require(robustHD)
 ```
 
 
@@ -88,72 +92,145 @@ and I don't know what the right answer is. Now I don't even have numbers. Please
 Hangout?"
 
 She does not enable video in the Hangout. However, she begins sending you some
-code. "Here is what I have in terms of output. Can you explain to me what is
-going on?"
+code. 
+# "Here is what I have in terms of output. Can you explain to me what is going on?"
 
 
 ```{r}
+# Loading a dataset in from a url
 load(url("http://jakebowers.org/Data/ho05.rda"))
-table(ho05$postbomb,useNA="ifany")
-library(dplyr)
+
+# Table of the 'postbomb' variable. It seems to have values of '0' and '1'. 
+# Note that the option 'useNA' allows you include missing values, denoted with an "NA" value in R. There do not seem to be any missing values.
+table(ho05$postbomb,useNA="ifany") 
+
+# Here's another way to see that (explicitly) using the 'exclude' option.  
+table(ho05$postbomb, exclude = NULL)
+
+# Will use some functions from the 'dplyr' package. If you don't understand this yet, there will be a formal workshop on this material after APSA. Until then, though here is a helpful set of examples: https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
+library(dplyr) 
+
+# You should know from the prep material that the '<-' and "=" commands are ways of assigning values in R. I suggest using the '<-' syntax, though with dplyr we will sometimes have to use an '=' when using mutate(). More on that later.
 wrkdat <- ho05  %>% filter(postbomb==0)
+
+# We see that the computer says that the sum of this variable is NA. Does that make sense? More below: 
 sum(wrkdat$hlphrs)
 ```
 
-She continues, "And then I have this from a previous meeting where they talked about `codebooks` but I don't think these were the ordinary kind of encrypted communication behind enemy lines."
+_The commented lines in the code explain all but the last line, which requires that we take a closer look and execute our own code._  
 
-\begin{small}
+```{r}
+# We don't know what this variable represents, but we can look at its values by using the table command. 
+table(ho05$hlphrs,useNA="ifany") 
+```
+
+_In keeping the 'useNA' option, we see that in addition to numbers ranging from 0 to 168, there are a few 'NA' values. What might you do about that? [Humm...](http://lmgtfy.com/?q=missing+values+sum()+R)_
+
+_Okay, so google says that we can remove these values and get an actual number. Think about why this is necessary and why summing values with NAs gives an NA in return, if you're so inclined._  
+
+```{r}
+# Sum variable and remove missing values
+sum(wrkdat$hlphrs, na.rm=T)
+```
+
+She continues, "And then I have this from a previous meeting where they talked about `codebooks` but I don't think these were the ordinary kind of encrypted communication behind enemy lines. [^1]: If you're compiling to html, the codebook text will look messy. HTML doesn't handle TeX well and using html would cause the opposite problem in pdf output. 
+
+\begin{small} 
 \begin{verbatim}
-  ### CODEBOOK
-  postbomb: 1=interviewed after the bombing, 0=interviewed before the bombing
+  ### CODEBOOK  
+  postbomb: 1=interviewed after the bombing, 0=interviewed before the bombing  
 
-  grphrs: 6.1.1 Which of the following groups, clubs or organisations
-    have you been involved with during the last 12 months? That's anything
-    you've taken part in, supported, or that you've helped in any way, either
-    on your own or with others. Please exclude giving money and anything that
-    was a requirement of your job.
+  grphrs: 6.1.1 Which of the following groups, clubs or organisations  
+    have you been involved with during the last 12 months? That's anything  
+    you've taken part in, supported, or that you've helped in any way, either  
+    on your own or with others. Please exclude giving money and anything that  
+    was a requirement of your job.  
 
-    6.1.2 In the last 12 months have you given unpaid help to any groups, clubs or
-    organisations in any of the following ways?
+    6.1.2 In the last 12 months have you given unpaid help to any groups, clubs or  
+    organisations in any of the following ways?  
 
-    6.1.5 Approximately how many hours have you spent helping this/these group(s),
-    club(s) or organisation(s) in the past 4 weeks?
+    6.1.5 Approximately how many hours have you spent helping this/these group(s),  
+    club(s) or organisation(s) in the past 4 weeks?  
 
-  infhrs: In the last 12 months have you done any of the following things,
-    unpaid, for someone who was not a relative?
+  infhrs: In the last 12 months have you done any of the following things,  
+    unpaid, for someone who was not a relative?  
 
-    This is any unpaid help you, as an individual, may have given to other people,
-    that is apart from any help given through a group, club or organisation. This
-    could be help for a friend, neighbour or someone else but not a relative.
+    This is any unpaid help you, as an individual, may have given to other people,  
+    that is apart from any help given through a group, club or organisation. This  
+    could be help for a friend, neighbour or someone else but not a relative.  
 
-    6.4.4 Now just thinking about the past 4 weeks. Approximately how many hours
-    have you spent doing this kind of thing/these kind of things in the past 4
-    weeks?
+    6.4.4 Now just thinking about the past 4 weeks. Approximately how many hours  
+    have you spent doing this kind of thing/these kind of things in the past 4  
+    weeks?  
 
-  hlphrs: grphrs+infhrs
+  hlphrs: grphrs+infhrs  
 \end{verbatim}
 \end{small}
 
-She asks, "What is the best way to say how civic life was going before the bombings? What is the right answer?"
+# She asks, "What is the best way to say how civic life was going before the bombings? What is the right answer?"
+
+_So we have an answer for what 'hlphrs' represents. Strictly speaking, it is the sum of hours spent helping for certain organizations and individuals who are not relatives. What does it represent? Well, your friend's question suggests that it represents some form of behavior in an individual's civi life, perhaps charity. So how does this change before and after the bombings?_
+
+```{r}
+# Here is a list of 'hlphrs' values prior to the bombings. We'll use the same filter() command that we saw above, but also include the select() command so that only include one variable value
+# I realize that we haven't explained the magrittr/chaining/pipe operator (%>%) yet. How about now that I've told you its many names, you investigate it? 
+preBombing <- ho05 %>% 
+  filter(postbomb == 0) %>% 
+  select(hlphrs)
+preBombing
+
+# And post-bombing values
+postBombing <- ho05 %>% 
+  filter(postbomb == 1) %>% 
+  select(hlphrs)
+postBombing
+```
+
+_Okay, the lists are really uninformative. How about we choose a measure of central tendency to give to your friend._
+
+```{r}
+# The average, with NAs removed. What would happen if I didn't remove the NAs?
+mean(preBombing$hlphrs, na.rm=T)
+mean(postBombing$hlphrs, na.rm=T)
+```
+
+_What do you see? Well, it looks like the number of hours spent helping others increased after the bombing so you could tell your friend that the effect of the bombing was positive for civil life in this respect. But don't get carried away. The average number of hours increased, but we haven't talked about our confidence in this increase, whether the size is meaningful, or a number of other things._
 
 Later, after you had worked on this a bit she calls back, "Hey. Thanks so much
 for helping! I just found this code and thought it might be useful. What do you
-think? Can you tell me what this means? Does it help me get the right answer
-about how much time people in the UK were devoting to helping each other and/or
-supporting groups? Why are there so many ways to descibe a single variable
-anyway? What is the point?  Also, are there any plots that would help me tell
-the right story about this variable?"
+think? 
+
+# Can you tell me what this means? 
+_Yeah, let me put some comments in the code._  
 
 ```{r, results='hide'}
+# This is the average with the 10% of the values trimmed from the top and bottom. How else might you do this, say using the quantile() command or a similar approach. This would be a great Daily R activity.  
 mean(wrkdat$hlphrs,trim=.1,na.rm=TRUE)
+
+# Creates a new object out of the 'wrkdat' object where each value of hlphrs is atomized (broken down). Now each value contained in the 'hlp' vector is the number of hours and the name represents the variable name with an observation number appended to the end.  
 hlp <- unlist(wrkdat %>% dplyr::select(hlphrs) %>% filter(!is.na(hlphrs)))
+
+# In case the unlist() command still isn't making sense:  
+length(hlp)
+sum(!is.na(wrkdat$hlphrs))
+hlp[1:5]
+wrkdat$hlphrs[1:5]
+
+# You will need to install this, probably.  
 library(psych)
+
+# Tired of google? Too bad. The simple answer to what this does: winsorizing mean. 
+# This 
 winsor.mean(hlp)
+
+# What are you supposed to google? Either robustHD() or winsorize() and "R" will lead you to the documentation. Interpretation below.  
 library(robustHD)
 mean(winsorize(hlp))
 
-onestepMest <- function(x){
-	## Following http://www.psychology.mcmaster.ca/bennett/boot09/rt2.pdf
+# Here's your first user-defined function in R. 
+# We will talk about this too.
+onestepMest <- function(x){ # create a function named onestepMest, takes in 'x'
+	## Following http://www.psychology.mcmaster.ca/bennett/boot09/rt2.pdf # You can go here to read about the method
 	madn <- mad(x, constant = 1.4826) ## 1/1.4826 = .6745
 	M <-  ( abs(x - median(x)) / madn )  > 1.28
 	U <- sum( x > M)
@@ -164,14 +241,44 @@ onestepMest <- function(x){
 	return(mux)
 }
 
+# Interpret me. Okay, in a bit. 
 onestepMest(hlp)
+
 library(robustbase)
+# Ditto, see below
 huberM(hlp)
 fivenum(hlp)
+
+# Oh, hey. Turns out that the vast majority of people don't care for others at all. Well, at least not according to this measure. 50% less than 1 hour (most spent 0). At the extremes, the top ten percent spent 18+ hours and the top person spent 168, which definitely inflates the mean.  
 quantile(hlp,seq(0,1,.1))
 
+# Shoot, I want to know about this 168-hour person. I'll use indexing, if only to show you that there are different ways to do this. dplyr is cleaner. 
+wrkdat[which(wrkdat$hlphrs==max(wrkdat$hlphrs, na.rm=T)),]
 ```
 
-<!-- see also https://dornsife.usc.edu/labs/rwilcox/software/ and WRS:::mest  https://dornsife.usc.edu/assets/sites/239/docs/WRS2.pdf and the MASS library--->
+# Does it help me get the right answer about how much time people in the UK were devoting to helping each other and/or supporting groups? 
+_It gives us a better idea than just the mean. It is just for the preBombing time period though, so we're not really making a comparison yet. Hey, another great Daily R assignment (or seven)_
+
+# Why are there so many ways to descibe a single variable anyway? 
+_Because everyone didn't spend the same amount of time helping people. We'd like to know if some extreme values in particular are driving the difference pre/post-bombing._
+
+# What is the point?  
+_Again, we're not even making the comparison between pre and post here, but we can be pretty sure that the average difference between the two times is misleading due to extreme values for this 'hlphrs' variable. At least the vanilla average is misleading. The others means of calculating averages, using..._
+
+# Also, are there any plots that would help me tell the right story about this variable?
+_Why yes. And if you had asked this first, we probably wouldn't have spent so much time looking at means. A picture, something-something-something words._  
+
+```{r}
+hist(preBombing$hlphrs)
+hist(postBombing$hlphrs)
+```
+
+
+<!-- see also https://dornsife.usc.edu/labs/rwilcox/software/ and WRS:::mest  https://dornsife.usc.edu/assets/sites/239/docs/WRS2.pdf and the MASS library
+
+This is a comment. You will not see it in the compiled document. You may use Ctrl/Cmd+Shift+C to insert a comment. Explore the other tricks and keyboard shortcuts by, you guessed it, searching for them on the internet.  
+
+--->
 
 # References
+At some point, we will go over how to include references -- either using a bibtex or some of the citation packages. For now, feel free to paste some things in here that you used to answer the questions. They'll help show effort in addition to being good practice.  
