@@ -1,29 +1,4 @@
----
-title: 'Exploration 2: Description of Relationships'
-author: 'Jake Bowers'
-date: '`r format(Sys.Date(), "%B %d, %Y")`'
-bibliography: classbib.bib
-fontsize: 10pt
-geometry: margin=1in
-mainfont: "Crimson Text"
-graphics: yes
-output:
-  html_document:
-    fig_caption: yes
-    fig_height: 4
-    fig_width: 4
-  pdf_document:
-    latex_engine: xelatex
-    fig_caption: yes
-    fig_height: 4
-    fig_width: 4
----
-
-<!-- Make this document using library(rmarkdown); render("exploration1.Rmd") -->
-\input{mytexsymbols}
-
-
-```{r include=FALSE, cache=FALSE}
+## ----include=FALSE, cache=FALSE------------------------------------------
 # Some customization.  You can alter or delete as desired (if you know what you are doing).
 # knitr settings to control how R chunks work.
 
@@ -48,10 +23,8 @@ opts_chunk$set(
   fig.retina=FALSE,
   message=FALSE,
   comment=NA)
-```
 
-
-```{r initialize,echo=FALSE}
+## ----initialize,echo=FALSE-----------------------------------------------
 ##First, just setup the R environment for today:
 if(!file.exists('figs')) dir.create('figs')
 
@@ -68,33 +41,13 @@ options(SweaveHooks=list(fig=function(){
 	width=132
 	)
 options(error=function(){options(prompt="> ",continue="+ ");NULL})
-```
 
-
-"Thanks!" Your friend's voice sounds much calmer than it did when you last
-spoke. "My tasks this week are much less scary than engaging with long-tailed
-and zero-inflated variables like hours spent helping others and groups." When
-you ask what she is up to, she replies,"I do need some help. At a recent
-meeting we had a debate about two different statements. Can you help me by
-providing answers based in data? We got into a shouting matching and only
-stopped when I mentioned the word 'data'. I don't know much
-about data. Can you help? Here are the two statements."
-
-> Support for anti-immigration populists like Trump or the UKIP party arises from anti-feminism more than nativism."
-
-> In countries like the UK, education and income are not strongly related."
-
-"I managed to find a survey that is supposed to be representative of people in the UK."
-
-```{r readdata}
+## ----readdata------------------------------------------------------------
 # library(foreign) ## For older Stata files
 library(readstata13)
 bes<-read.dta13("http://jakebowers.org/Data/BES2015/bes_f2f_original_v3.0.dta",convert.factors=FALSE)
-```
 
-"And I found a (codebook)[http://jakebowers.org/Data] too. And have learned enough about R to investigate some variables."
-
-```{r sometabs, results="hide"}
+## ----sometabs, results="hide"--------------------------------------------
 table(bes$r03,useNA="ifany") ##  Feminism
 table(bes$Age,useNA="ifany")
 table(bes$y01,useNA="ifany") ## Income
@@ -106,20 +59,8 @@ table(bes$b04,useNA="ifany")
 bes$ukipvoter <- as.numeric(ifelse(is.na(bes$b02),bes$b04==8,bes$b02==7))
 table(bes$ukipvoter,useNA="ifany")
 table(bes$d01,useNA="ifany") # Party ID
-```
 
-"What do you think? Between these variables, and the others in the codebook,
-can you provide some evidence for or against those statements? Since this was
-such a heated discussion in our staff meeting, I'd like to see at least three
-ways to describe the relationships including that least squares stuff that
-people always talk about. And I'll need you to justify the weaknesses and
-strengths of the tactics you choose to use. And, especially for the least
-squares description, can you please help me understand why it is called least
-squares and why I should care about least squares versus most squares or least
-something else?  Right now, we just want to describe relationships so
-$p$-values or confidence intervals would not be helpful."
-
-```{r}
+## ------------------------------------------------------------------------
 lm1<-lm(ukipvoter~r03,data=bes,subset=r03!=-1 & j05!=-1)
 predlm1 <- predict(lm1,newdata=data.frame(r03=c(1,5)))
 predlm1[1] - predlm1[2]
@@ -163,7 +104,5 @@ for(i in 1:nrow(res)){
 }
 
 
-
-```
 
 

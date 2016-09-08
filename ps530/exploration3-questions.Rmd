@@ -11,17 +11,15 @@ output:
 
 ------------
 
-\vspace{3cm}
+/vspace{3cm}
 
-```{r source-530-exploration3, include=F}
-tempR <- tempfile(fileext = ".R")
+```{r source-530-explorations, include=F}
 require(knitr)
-# Let's make our paths work within the working directory for any machine
-PROJHOME = normalizePath(getwd())
-# purl(file.path(PROJHOME, "ps530", "exploration3.Rmd"), output=tempR) # Nope, it's broken
-purl("C:/Users/duurenn2/Desktop/Dropbox/Graduate School/Fall 2016/uips-stat-share/ps530/exploration3.Rmd", output=tempR)
-source(tempR)
-unlink(tempR)
+# I'm running all the R code from explorations 2 and 3 here. This way I'll have access to datasets and variables used in those assignments.
+# To get this to work on your machine, you'll need to change the working directory. Look it up if you're interested!
+setwd("C:/Users/duu/Documents/Dropbox/Graduate School/Fall 2016/uips-stat-share/")
+source(purl("ps530/exploration2.Rmd"))
+source(purl("ps530/exploration3.Rmd"))
 ```
 
 
@@ -39,14 +37,14 @@ opts_chunk$set(
   highlight=TRUE,
   width.cutoff=132, 
   size='footnotesize',
-  out.width='.9\\textwidth',
+  out.width='.9//textwidth',
   fig.retina=FALSE,
   message=FALSE,
   warning=FALSE,
   comment=NA)
 ```
 
-```{r packages, include=F}
+```{r packages, include=F, eval = F}
 # install.packages(c("devtools", "knitcitations"))
 require(knitcitations)
 cleanbib()
@@ -57,5 +55,30 @@ __Questions__
 As people ask questions, I'll post responses here and push them to the shared folder. You can email me these questions or create an "issue" in the 'uips-stat-share' repository. Note that this is different than the 'explorations' repository -- we should probably try to keep that relatively clutter-free.  
 
 # Readings
-Before considering non-linear relationships, make sure that you have a good understanding of linear relationships and specifically how OLS fits its line. A closer reading (and practice) with the _Kaplan_ and _James et al_ textbooks should be useful here. Chapter 3 and the "Lab" section of the _James et al_ book should be especially helpful, as it also includes some topics that are useful for this week.  
+Before considering non-linear relationships, make sure that you have a good understanding of linear relationships and specifically how OLS fits its line. A closer reading (and practice) with the __Kaplan__ and __James et al__ textbooks should be useful here. Chapter 3 and the "Lab" section of the __James et al__ book should be especially helpful, as it also includes some topics that are useful for this week.  
+
+# Getting Started
+Once you've read the textbook and worked through a few examplese, try returning to OLS using an example from class, but now with a continuous explanatory and outcome variable. As the exploration suggests, use the _age_ as your explanatory variable and support for Donald Trump (_fttrump_) as the outcome. You can find the codebook for this 2016 pilot of the ANES [here](http://www.electionstudies.org/studypages/anes_pilot_2016/anes_pilot_2016_CodebookUserGuide.pdf). If you don't know what a feeling thermometer is, look it up or ask an Americanist. Interested in the wording of the questions? Check [here](http://www.electionstudies.org/studypages/anes_pilot_2016/anes_pilot_2016_qnaire.pdf)/  
+
+I put some code and comments below to help get you started
+
+
+```{r}
+# The variables
+summary(anespi16$fttrump) # FT support for Donald Trump. Are there are surprising values?
+summary(anespi16$birthyr) # Year born. Try to convert it into age.
+
+# Plot the data. Consider what line would fit? Would it fit well? What makes for a good and bad fit again, according to OLS? 
+
+# Remeber the myssr() function? See if you can get it working for these data! A conus if you can get the contour plot working (no actual credit available).
+
+# Here's an example of a contour plot using the ggplot package
+require(ggplot2)
+
+ggplot(data=faithfuld, aes(x=waiting, y=eruptions, z = density)) + 
+  geom_contour()
+
+```
+
+
 
