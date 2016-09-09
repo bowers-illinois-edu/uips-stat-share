@@ -1,5 +1,5 @@
 ---
-title: "exploration1-questions"
+title: "exploration2-questions"
 author: "Duu Renn"
 date: "August 29, 2016"
 output: 
@@ -29,8 +29,9 @@ opts_chunk$set(
 ```
 
 
-```{r source-531-exploration1, include=F}
-source(purl("ps531/exploration1.Rmd"))
+```{r source-531-exploration2, include=F}
+require(knitr)
+source(purl("ps531/exploration2.Rmd"))
 ```
 
 # Questions

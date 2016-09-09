@@ -2,8 +2,10 @@
 title: "exploration3-questions"
 author: "Duu Renn"
 date: "September 9, 2016"
-output: 
-  pdf_document: 
+output:
+  html_document:
+    toc: yes
+  pdf_document:
     number_sections: yes
     toc: yes
 ---
@@ -68,7 +70,20 @@ I put some code and comments below to help get you started
 summary(anespi16$fttrump) # FT support for Donald Trump. Are there are surprising values?
 summary(anespi16$birthyr) # Year born. Try to convert it into age.
 
+# Fit the linear model, but exclude the 998s in the feeling thermometer
+lmLinear <- lm(fttrump ~ birthyr, data=anespi16, subset=fttrump<=100)
+
+# Guess: The greater your birthyear the lower your ft score for trump.
+summary(lmLinear)
+coef(lmLinear)
+# Substantive interpretation
+# refer to class notes
+
 # Plot the data. Consider what line would fit? Would it fit well? What makes for a good and bad fit again, according to OLS? 
+with(subset(anespi16, fttrump<=100), plot(birthyr, fttrump))
+abline(a = 77, b= -.3, pch=4)
+
+sum(lmLinear$residuals^2)
 
 # Remeber the myssr() function? See if you can get it working for these data! A conus if you can get the contour plot working (no actual credit available).
 
