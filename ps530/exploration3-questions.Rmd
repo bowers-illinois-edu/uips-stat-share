@@ -95,5 +95,31 @@ ggplot(data=faithfuld, aes(x=waiting, y=eruptions, z = density)) +
 
 ```
 
+# Null response for 'splines' 
+What should the regression output look like for non-linear functions? Here's a question from a group:  
+
+> At the moment we're working on running the smooth.spline function - although R lets us run the function, when we call up the coefficients, it results in NULL, and when we check the sum of squares of residuals, we also get 0, even when changing the degrees of freedom in our smooth.spline function.  
+
+```{r, eval = F}
+globalNonLinear <- smooth.spline(anespi16$fttrump, anespi16$birthyr, df=6)
+
+# So these are what we use for linear models, but what happens when you apply them to non-linear models --- the smooth.spline() function specifically. 
+coef(globalNonLinear)
+sum(globalNonLinear$residuals^2)
+
+# What is inside a lm() object?
+ls(lmLinear)
+
+# What is inside the smooth.spline object? 
+ls(globalNonLinear)
+
+```
+
+So here are some bigger questions that might help lead to an answer. If a linear model is a slope and an intercept, what defines a spline? The [documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/smooth.spline.html) may help you find the answer. How would you get residuals out of the spline model? How would you graph it?  
+
+```{r, eval = F, include=F}
+sum(residuals(globalNonLinear)^2)
+```
+
 
 

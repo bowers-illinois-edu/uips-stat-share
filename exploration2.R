@@ -3,12 +3,26 @@
 # knitr settings to control how R chunks work.
 
 ## To make the html file do
-## render("exploration2.Rmd",output_format=html_document(fig_retina=FALSE))
+## render("exploration1.Rmd",output_format=html_document(fig_retina=FALSE))
 ## To make the pdf file do
-## render("exploration2.Rmd",output_format=pdf_document())
+## render("exploration1.Rmd",output_format=pdf_document())
 
 require(knitr)
-opts_chunk$set( tidy=FALSE, echo=TRUE,results='markup',strip.white=TRUE,fig.path='figs/fig',cache=FALSE,highlight=TRUE,width.cutoff=100,size='tiny',message=FALSE,comment=NA)
+opts_chunk$set(
+  tidy=FALSE,     # display code as typed
+  size="small",    # slightly smaller font for code
+  echo=TRUE,
+  results='markup',
+  strip.white=TRUE,
+  fig.path='figs/fig',
+  cache=FALSE,
+  highlight=TRUE,
+  width.cutoff=132,
+  size='footnotesize',
+  out.width='.9\\textwidth',
+  fig.retina=FALSE,
+  message=FALSE,
+  comment=NA)
 
 ## ----initialize,echo=FALSE-----------------------------------------------
 ##First, just setup the R environment for today:
@@ -26,248 +40,69 @@ options(SweaveHooks=list(fig=function(){
 	scipen=8,
 	width=132
 	)
+options(error=function(){options(prompt="> ",continue="+ ");NULL})
 
-## ----inspectmatches, results='hide'--------------------------------------
-load(url("http://jakebowers.org/Data/ho05.rda"))
+## ----readdata------------------------------------------------------------
+# library(foreign) ## For older Stata files
+library(readstata13)
+bes<-read.dta13("http://jakebowers.org/Data/BES2015/bes_f2f_original_v3.0.dta",convert.factors=FALSE)
 
-covariatesLabels <- c("GOR" = "Government Office Region",
-		      "Rsex" = "Gender",
-		      "Rdmstat" = "Respondent de facto marital status",
-		      "Rage" = "Age",
-		      "Ethnic11" = "Ethnicity",
-		      "RILO4A" = "Economic Status",
-		      "hhinc" = "Household Income",
-		      "ZQuals1" = "Highest qualification: includes 70+ (???)",
-		      "DVHSize" = "Number of people in household",
-		      "immigrant" = "Immigrant",
-		      "workstatus" = "Employment status",
-		      "SLive" = "Years lived in neighborhood",
-		      "relig.and.act" = "Interaction of religion and practicing questions",
-		      "Rnssec17" = "NSSec grouped into 17 categories (???)",
-		      "HTen1" = "Owns or rents",
-		      "Rage5cat" = "5 level categorical variable for age",
-		      "hhinc5cat" = "5 level cateogrical variable for household income",
-		      "DVHSizeCat" = "Categorical coding of household size: 1, 2, 3, or 4+" ,
-		      "SLive5cat" = "5 level cateogrical variable for years lived in neighborhood")
+## ----sometabs, results="hide"--------------------------------------------
+table(bes$r03,useNA="ifany") ##  Feminism
+table(bes$Age,useNA="ifany")
+table(bes$y01,useNA="ifany") ## Income
+table(bes$j05,useNA="ifany") ## Immigration
+table(bes$education,useNA="ifany")
+table(bes$b02,useNA="ifany")
+table(bes$b04,useNA="ifany")
+## 1 if voted or would have voted for ukip
+bes$ukipvoter <- as.numeric(ifelse(is.na(bes$b02),bes$b04==8,bes$b02==7))
+table(bes$ukipvoter,useNA="ifany")
+table(bes$d01,useNA="ifany") # Party ID
 
-covariates <- names(covariatesLabels)
+## ------------------------------------------------------------------------
+lm1<-lm(ukipvoter~r03,data=bes,subset=r03!=-1 & j05!=-1)
+predlm1 <- predict(lm1,newdata=data.frame(r03=c(1,5)))
+predlm1[1] - predlm1[2]
 
-wrkdat<-ho05[!is.na(ho05$hlphrs)&ho05$Rage!=0,] ## removing bad obs
-library(optmatch)
-library(RItools)
-load('fm1.rda') ## at the end of the last session I did save(fm1,file='fm1.rda')
-all.equal(names(fm1),row.names(wrkdat))
-with(wrkdat,table(fm1,postbomb,useNA="ifany"))
-table(matched(fm1))
-## Who was not matched? How do they compare to those included in the matched design?
-notmatchedfolks<-subset(wrkdat,subset=unmatched(fm1),select=c("postbomb","hlphrs","Rsex","Rage","ZQuals1"))
-summary(subset(wrkdat,subset=matched(fm1),select=c("postbomb","hlphrs","Rsex","Rage","ZQuals1")))
-summary(notmatchedfolks)
-wrkdat$notmatched<-as.numeric(unmatched(fm1))
-tmpfmla<-reformulate(covariates[1:15],response="notmatched")
-compareMatched2UnMatched<-xBalance(tmpfmla,data=wrkdat,
-	      report=c("std.diffs","z.scores","adj.means",
-                    "adj.mean.diffs", "chisquare.test","p.values"))
-compareMatched2UnMatched
-## What sets have the largest differences in number of immigrants
-immdiffs<-sapply(split(wrkdat,fm1),function(dat){ mean(dat$immigrant) })
-table(immdiffs)
-diverseImmigrantSets<-names(immdiffs[immdiffs==.5])
+bes$proweq<-(bes$r03-1)/4
+bes$proweq[bes$proweq<0] <- NA
+table(bes$proweq,bes$r03,useNA="ifany")
 
-## Effect conditional on the matched design overall
-lmOverall<-lm(hlphrs~postbomb+fm1,data=wrkdat)
-coef(lmOverall)[["postbomb"]]
-## Set by set differences of means
-setEffects<-sapply(split(wrkdat,fm1),function(dat){ coef(lm(hlphrs~postbomb,data=dat))[["postbomb"]] })
-sort(zapsmall(setEffects))
-## Set by set effects for the sets with the most immigrant diversity (i.e. where half of the people were immigrants)
-zapsmall(setEffects[diverseImmigrantSets])
-summary(setEffects[diverseImmigrantSets])
-lm(hlphrs~postbomb,data=wrkdat[fm1 %in% diverseImmigrantSets,])
+lm1a <- lm(ukipvoter ~ proweq , data=bes, subset=j05!=-1)
 
-## ----activemuslims, results='hide', echo=FALSE---------------------------
-table(wrkdat$relig.and.act)
-table(wrkdat$relig.and.act=="Muslim.Active")
-activemuslims<-sapply(split(wrkdat,fm1),function(dat){ mean(dat$relig.and.act=="Muslim.Active") })
-table(activemuslims)
-mostActiveMuslimDiffs<-names(activemuslims[activemuslims==.5])
-mostActiveMuslims<-names(activemuslims[activemuslims==max(activemuslims)])
-leastActiveMuslims<-names(activemuslims[activemuslims==min(activemuslims)])
+bes$proimmig <- bes$j05 - 1
+with(bes,table(proimmig,j05))
+lm2<-lm(ukipvoter~proimmig,data=bes,subset=r03!=-1 & j05!=-1)
+predlm2<-predict(lm2,newdata=data.frame(proimmig=c(0,1)))
+predlm2[1] - predlm2[2]
 
-zapsmall(setEffects[mostActiveMuslimDiffs])
-zapsmall(setEffects[mostActiveMuslims])
-zapsmall(setEffects[leastActiveMuslims])
+lm1b <- lm(ukipvoter ~ proweq + I(proweq^2), data=bes, subset=j05!=-1)
 
-summary(setEffects[mostActiveMuslimDiffs])
-summary(setEffects[mostActiveMuslims])
-summary(setEffects[leastActiveMuslims])
+line1 <- .1 - .3 * bes$proweq
+diffs1 <- bes$proweq - line1
+sum(diffs1^2,na.rm=TRUE)
 
-coef(lmOverall)[["postbomb"]]
+diffslm1a <- residuals(lm1a)
+sum(diffslm1a^2)
 
-
-
-## ----tidy=FALSE, results='hide'------------------------------------------
-wrkdat$hlp01<-as.numeric(wrkdat$hlphrs>0)
-## check recode:
-## with(wrkdat,table(hlp01,hlphrs))
-logitmod<-glm(hlp01~postbomb,data=wrkdat,family=binomial(link="logit"))
-coef(logitmod)[["postbomb"]] ## This is biased according to David Freedman 2008 and it doesn't estimate what was requested.
-olsmod<-lm(hlp01~postbomb,data=wrkdat)
-coef(olsmod)[["postbomb"]] ## This estimates the requested quantity and it is unbiased!
-
-## ----biassketch, results='hide', eval=FALSE, echo=TRUE, cache=TRUE-------
-set.seed(20150313)
-## Bias refers to a relationship between the repeated operation of a procedure and a truth. So we have to invent a truth.
-numhlpers<-round(nrow(wrkdat)*.55) ## table(wrkdat$hlp01[wrkdat$postbomb==0])
-wrkdat$fakey0<-sample(rep(c(0,1),c(nrow(wrkdat)-numhlpers,numhlpers)))
-trueATE<-.25 ## posit a true average treatment effect
-wrkdat$fakey1<-wrkdat$fakey0+trueATE
-
-wrkdat$obsy<-with(wrkdat, postbomb*fakey1+(1-postbomb)*fakey0 ) ## what we observe
-
-## calculate the true ATE and the $\hat{\bar{\tau}}$
-trueATEfake<-with(wrkdat,mean(fakey1)-mean(fakey0))
-trueTotal<-with(wrkdat,sum(fakey1))
-trueDiffLogOdds<-
-## estimate the true ATE using the data that we would observe in this fake experiment
-estATEfake<-coef(lm(obsy~postbomb,wrkdat))["postbomb"]
-estTotal<-with(wrkdat,mean(obsy[postbomb==1])*length(obsy))
-
-# define a function which reveals a difference in observed outcome and calculates
-## estimates of the ATE given a different treatment vector
-makeNewObsyAndEst<-function(thez){
-    newobsy<-with(wrkdat, thez*fakey1+(1-thez)*fakey0 )
-    lmATE<-coef(lm(newobsy~thez))[["thez"]]
-    totalEffect<-mean(newobsy[thez==1])*length(newobsy)
-    ## gammaglm<-glm(newobsy~thez,family=Gamma) ## Change this old stuff to logit for the Boss
-    ## haty0<-predict(gammaglm,newdata=data.frame(thez=0),type="response")
-    ## haty1<-predict(gammaglm,newdata=data.frame(thez=1),type="response")
-    ## gammaglmATE<-haty1-haty0
-    ## gammacoef<-coef(gammaglm)[["thez"]]
-    ## return(c(lmATE=lmATE,gammacoef=gammacoef,gammaglmATE=gammaglmATE))
-    return(c(lmATE=lmATE,totalTE=totalEffect))
+myssr<-function(a,b){
+  line1 <- a + b * bes$proweq
+diffs1 <- bes$proweq - line1
+sum(diffs1^2,na.rm=TRUE)
 }
 
-## Does the pair of functions do what we want them to do?
-makeNewObsyAndEst(sample(wrkdat$postbomb))
+as <- runif(100,-1,1) ##.145 + seq(-.1,.1,length=100)
+bs <- -.06 + seq(-.1,.1,length=100)
+inputs <- expand.grid(as,bs)
 
-nsims<-10000
-## For many of the possible ways to run the experiment, calculate this mean difference
-### The slow way:
-## dist.sample.est<-replicate(nsims,make.new.R.and.est(sample(wrkdat$postbomb)))
-
-### The fast way uses all of the cores on your unix-based machine (mac or linux):
-require(parallel)
-ncores<-detectCores()
-system.time(
-dist.sample.est<-simplify2array(
-                                mclapply(1:nsims,function(i){
-                                         makeNewObsyAndEst(sample(wrkdat$postbomb))
-                                 },mc.cores=ncores)
-                                )
-)
-
-str(dist.sample.est)
-apply(dist.sample.est,1,summary)
-
-## And recall that we have simulation error on the order of 1/sqrt(nsims)
-SEsims<-apply(dist.sample.est,1,function(x){ sqrt(var(x)/nsims) })
-
-
-## ----interplogit, results='hide', echo=FALSE-----------------------------
-
-with(wrkdat,table(hlp01,postbomb))
-
-(363*121)/(433*79)
-
-exp(coef(logitmod)["postbomb"])
-
-preddat<-expand.grid(postbomb=c(0,1))
-preddat$yhat<-predict(logitmod,newdata=preddat,type="response")
-preddat$xbhat<-predict(logitmod,newdata=preddat,type="link")
-## Using the probability scale
-preddat$yhat[preddat$postbomb==1]-preddat$yhat[preddat$postbomb==0]
-## Compare:
-coef(olsmod)[['postbomb']]
-preddat$xbhat[preddat$postbomb==1]-preddat$xbhat[preddat$postbomb==0]
-coef(logitmod)[['postbomb']]
-exp(preddat$xbhat[preddat$postbomb==1]-preddat$xbhat[preddat$postbomb==0])
-## odds(x)=prob(x)/(1-prob(x)) and
-
-
-## ----biaswithlogit, echo=TRUE, cache=TRUE--------------------------------
-set.seed(20150313)
-## Bias refers to a relationship between the repeated operation of a procedure and a truth. So we have to invent a truth.
-## numhlpers<-round(nrow(wrkdat)*.55) ## table(wrkdat$hlp01[wrkdat$postbomb==0])
-wrkdat$latenty0<-rnorm(nrow(wrkdat))
-wrkdat$fakey0<-as.numeric(wrkdat$latenty0 >= qnorm(.55,lower.tail=FALSE) )
-prop.table(table(wrkdat$fakey0))
-## wrkdat$fakey0<-sample(rep(c(0,1),c(nrow(wrkdat)-numhlpers,numhlpers)))
-trueATE<-.25 ## posit a true average treatment effect
-## In the context of a binary outcome such a treatment effect is a difference of proportions
-## that is, we should change 25\% of the 0s in fakey0 to 1.
-wrkdat$latenty1<-wrkdat$latenty0+trueATE
-wrkdat$fakey1<-as.numeric(wrkdat$latenty1 > qnorm(.8,mean=mean(wrkdat$latenty1),lower.tail=FALSE))
-
-wrkdat$obsy<-with(wrkdat, postbomb*fakey1+(1-postbomb)*fakey0 ) ## what we observe
-
-## calculate the true ATE and the $\hat{\bar{\tau}}$
-trueATEfake<-with(wrkdat,mean(fakey1)-mean(fakey0))
-trueTotal<-with(wrkdat,sum(fakey1))
-trueDelta<-with(wrkdat, log( mean(fakey1)/(1-mean(fakey1))) - log( mean(fakey0)/(1-mean(fakey0))))
-## true Logit?
-## estimate the true ATE using the data that we would observe in this fake experiment
-estATEfake<-coef(lm(obsy~postbomb,wrkdat))["postbomb"] ## same as a mean difference on obsy
-estTotal<-with(wrkdat,mean(obsy[postbomb==1])*length(obsy))
-estDelta1<-coef(glm(obsy~postbomb,wrkdat,family=binomial(link="logit")))[["postbomb"]]
-estDelta2<-with(wrkdat, log( mean(obsy[postbomb==1])/(1-mean(obsy[postbomb==1]))) -
-		 log( mean(obsy[postbomb==0])/(1-mean(obsy[postbomb==0])))
-	      )
-## Notice that estDelta1 and estDelta2 are the same.
-
-# define a function which reveals a difference in observed outcome and calculates
-## estimates of the ATE given a different treatment vector
-makeNewObsyAndEst<-function(thez){
-    newobsy<-with(wrkdat, thez*fakey1+(1-thez)*fakey0 )
-    lmATE<-coef(lm(newobsy~thez))[["thez"]]
-    totalEffect<-mean(newobsy[thez==1])*length(newobsy)
-    logitglm<-glm(newobsy~thez,family=binomial(link="logit"))
-    haty0<-predict(logitglm,newdata=data.frame(thez=0),type="response")
-    haty1<-predict(logitglm,newdata=data.frame(thez=1),type="response")
-    logitDelta<-log( mean(haty1)/(1-mean(haty1))) - log( mean(haty0)/(1-mean(haty0)))
-    logitglmATE<-haty1-haty0
-    logitcoef<-coef(logitglm)[["thez"]]
-    return(c(lmATE=lmATE,totalTE=totalEffect,logitcoef=logitcoef,logitglmATE=logitglmATE,logitDelta=logitDelta))
+res<-matrix(nrow=100*100,ncol=3)
+for(i in 1:nrow(res)){
+  res[i,1]<-myssr(inputs[i,1],inputs[i,2])
+  res[i,2]<-inputs[i,1]
+  res[i,3]<-inputs[i,2]
 }
 
-## Does the pair of functions do what we want them to do?
-makeNewObsyAndEst(sample(wrkdat$postbomb))
 
-nsims<-10000
-## For many of the possible ways to run the experiment, calculate this mean difference
-### The slow way:
-## dist.sample.est<-replicate(nsims,makeNewObsyAndEst(sample(wrkdat$postbomb)))
-
-### The fast way uses all of the cores on your unix-based machine (mac or linux):
-require(parallel)
-ncores<-detectCores()
-system.time(
-dist.sample.est<-simplify2array(
-                                mclapply(1:nsims,function(i){
-                                         makeNewObsyAndEst(sample(wrkdat$postbomb))
-                                 },mc.cores=ncores)
-                                )
-)
-
-str(dist.sample.est)
-apply(dist.sample.est,1,summary)
-
-## Compare to
-trueATEfake
-trueTotal
-trueDelta
-
-## And recall that we have simulation error on the order of 1/sqrt(nsims)
-SEsims<-apply(dist.sample.est,1,function(x){ sqrt(var(x)/nsims) })
 
 
