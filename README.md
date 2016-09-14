@@ -15,6 +15,7 @@ For example:
 *__Aug 26__ - Basic Markdown for reproducible research and using git for classwork and assignments  
 *__Sept 2__ - APSA weekend. Send questions via email and/or work together. There is also the [**ATLAS** lab][atlas], which staffs a help desk for R and other stats/programming-related issues. David Bowden is a PhD student in Political Science who currently works there.  
 *__Sept 9__ - We will start with a review of using git and Rmarkdown to help create some more uniformity in exploration submissions. Let's separate the meeting time with the first hour (3:00-3:50) for PS530 students and the next hour (4:00-4:50) being for PS531 students. As always, bring your questions about the weekly assignment.  
+*__Sept 16__ - Same meeting time as last week. Please send questions in advanced, if you can. No special topic this time around as most people seem busy enough with the explorations. Note that there are some examples with loops in PS530 student's [dailyR](https://github.com/bowers-grad-stats-illinois/dailyR) repository, in case that's helpful for some of your work this week. @ps531 students, remember that you have a paper for this class and should schedule time to talk to Jake about your papers as soon as you have a topic and data.  
 
 <!-- Links -->
 [atlas]: http://www.atlas.illinois.edu/services/stats/consulting/
