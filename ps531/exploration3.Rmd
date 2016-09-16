@@ -1,0 +1,683 @@
+---
+title: 'Exploration 3: Matrices make life easier.'
+author: 'Jake Bowers'
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+bibliography: classbib.bib
+fontsize: 10pt
+geometry: margin=1in
+mainfont: "Crimson Text"
+graphics: yes
+header-includes:
+  - \usepackage[T1]{fontenc}
+  - \usepackage{textcomp}
+  - \usepackage{fontspec}
+  - \newfontfamily\unicodefont[Ligatures=TeX]{TeX Gyre Heros}
+  - \newfontfamily\themainfont[Ligatures=TeX]{Crimson Text}
+  - \newfontfamily\grouptwofont[Ligatures=TeX]{Source Code Pro}
+  - \newfontfamily\groupthreefont[Ligatures=TeX]{Courier}
+output:
+    html_document:
+      fig_caption: yes
+      fig_height: 4
+      fig_width: 4
+    pdf_document:
+      fig_caption: yes
+      fig_height: 4
+      fig_width: 4
+      latex_engine: xelatex
+      keep_tex: true
+---
+
+
+<!-- Make this document using library(rmarkdown); render("exploration1.Rmd") -->
+\input{mytexsymbols}
+
+
+```{r include=FALSE, cache=FALSE}
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+# knitr settings to control how R chunks work.
+
+## To make the html file do
+## render("exploration2.Rmd",output_format=html_document(fig_retina=FALSE))
+## To make the pdf file do
+## render("exploration2.Rmd",output_format=pdf_document())
+
+require(knitr)
+opts_chunk$set( tidy=FALSE, echo=TRUE,results='markup',strip.white=TRUE,fig.path='figs/fig',cache=FALSE,highlight=TRUE,width.cutoff=100,size='tiny',message=FALSE,comment=NA)
+```
+
+
+```{r initialize,echo=FALSE}
+##First, just setup the R environment for today:
+if(!file.exists('figs')) dir.create('figs')
+
+options(SweaveHooks=list(fig=function(){
+			   par(mar=c(3.5, 3, 1.1, 0),
+			       pty="s",
+			       mgp=c(1.5,0.5,0),
+			       oma=c(0,0,0,0))},
+			 echo=function(){options(continue=" ") ##Don't show "+" prompts,
+			 options(prompt=" ")
+			 }),
+	digits=4,
+	scipen=8,
+	width=132
+	)
+```
+
+
+So far you have received no new communication from the UN. However, you did
+find an envelope full of cash with a cheery note saying "Thanks from the United
+Nations!" when you looked in your backpack. After you stopped wondering how
+someone had put the envelope into your bag, you receive a WhatsApp from another
+old friend. He is from one of the new political analytics firms that started to
+grow during the Obama campaign in the USA and he has a prediction problem. He
+has a small dataset of 8 cities and would like to predict current voting
+turnout in those cities based on a complex model. He says, "My last analyst
+provided the following code to fit my model but then stopped. I think that the
+best model of voting turnout uses median household income, median age, racial
+diversity (here, percent african american), and the number of candidates
+running for this city council office. I told the analyst this model and he
+provided the following code. Can you help me?"
+
+
+```{r}
+news.df<-read.csv("http://jakebowers.org/Data/news.df.csv")
+news.df$sF<-factor(news.df$s)
+```
+
+```{r, results='hide', echo=FALSE}
+lm1<-lm(rpre~medhhi1000+medage+blkpct+cands,data=news.df)
+coef(lm1)
+```
+
+"I really don't understand the lsCriterion function. Can you write out the criterion using math and explain it to me in plain language? I'm always especially interested in understanding **why** these stats types are doing this stuff, and I'm so grateful that you can explain it simply and plainly to me."
+
+```{r}
+lsCriterion<-function(b,y,X){
+  yhat<-b[1]*X[,1]+b[2]*X[,2]+b[3]*X[,3]+b[4]*X[,4]+b[5]*X[,5]
+  ehat<-y-yhat
+  thessr<-sum(ehat^2)
+  return(thessr)
+}
+
+X<-as.matrix(cbind(constant=1,news.df[,c("medhhi1000","medage","blkpct","cands")]))
+y<-news.df$rpre
+```
+
+"He said to 'try some different vectors' and I think that this meant that I was to guess about the values for the coefficients in the model and that, after trying a bunch, I would choose the vector that I liked best. So, for example, I tried a model with all zeros:"
+
+```{r}
+lsCriterion(c(0,0,0,0,0,0),y=y,X=X)
+```
+
+And then tried to see a bunch of other models.
+
+```{r}
+set.seed(12345)
+lsCriterion(c(1,0,4,0,0,0),y=y,X=X) ## hmm..ok... can I do better?
+lsCriterion(runif(5,-100,100),y=y,X=X) ## bad
+
+```
+
+"After trying a bunch of models, however, I started to get tired. Can you help me do this faster? I asked the analyst (who is really a construction engineer and not a statistician) if I could use a loop but he said it would be better to 'try to optimize the objective function' and this is as far as I got."
+
+
+```{r}
+lsSolution<-optim(fn=lsCriterion,par=c(0,0,0,0,0),X=X,y=y,
+		  method="BFGS",control=list(trace=1,REPORT=1))
+
+```
+
+"Is this the best solution? How well does this model predict the actual outcome (` r `) (this model uses baseline turnout or `rpre`). Can you give me some quantitative measure of how well our model predicted the outcome? I think that you can use the code from the `lsCriterion` function to develop predictions and compare our predictions to the actual turnout observed (the variable ` r`), right?"
+
+"Now, I wanted to add another variable to see how well that new model fit. For example, maybe `blkpct` has a curvilinear relationship with the outcome. I complained to the analyst that I would have to re-write the function every time that I had a new model. So, the analyst said, 'Use matrices.' and he sent this:"
+
+```{r}
+bVector<-solve(t(X) %*% X) %*% t(X) %*% y
+yhat<- X %*% bVector
+ehat<-y-yhat
+summary(ehat)
+```
+
+"Now, I'm very impressed at the speed and conciseness of this! I mean, he got the same vector of coefficients in like 1/1000 the time that it took me to search for a solution --- even using a fast optimizer. Also, he got the predictions very quickly too! But I'm confused about how this works. I understand the idea of proposing different values for the different coefficients and then asking how well they do --- in a sum of squared error sense. But the three lines that create `bVector` and `yhat` and even `ehat` are a mystery and I worry that they are not actually comparing my predictions of past turnout to observed future turnout (`rpre` versus ` r`). Maybe you can help? I asked the analyst to provide a little guidance to help you get practice with these ideas."
+
+
+So, you need to be able to explain what is happening when we tell R to do least squares with the matrix $\bX$ and
+vector $\by$ via $(\bX^{T}\bX)^{-1}\bX^{T}\by$ using the command
+`solve(t(X)%*%X)%*%(t(X)%*%y)`. Where
+`t(X)`$\equiv \bX^{T}$ (meaning the transpose of $\bX$) and
+`solve(X)`$\equiv \bX^{-1}$ (meaning the inverse of $\bX$).
+
+Here are some steps you might take to produce this explanation.
+
+1.  First, let's create a $\bX$ matrix using the newspapers data to
+  do a regression of the form `baseline.turnoutx~income+median age` (where
+  baseline.turnout is `rpre` and income is `medhhi1000` and median age of the city is `medage`). Here is
+  how one might do this in R for both $\bX$ and $\by$ (where,
+  \textbf{bold} represents matrices or vectors):
+
+```{r setupXandy, results='hide'}
+X<-as.matrix(cbind(1,news.df$medhhi1000,news.df$medage))  # "bind" together columns from the data and an intercept
+y<-matrix(news.df$rpre,ncol=1) # not strictly necessary, y<-news.df$rpre would also work
+
+# Look at the objects
+X
+y
+
+# Structure of the objects
+str(X)
+str(y)
+
+#Look at the dimensions of the objects: number rows by number columns
+dim(X)
+dim(y)
+```
+   - Explain how we created the $\bX$ matrix \emph{Hint:} The column of 1s has to do with the intercept or constant term.
+   - What do the columns of $\bX$ represent?
+   - What do the rows represent?
+
+2. First, addition and subtraction: Try each of the following lines of math in R and explain to yourself (or your colleagues) what happened, and what this means about matrix math. I did the first one as an example.
+
+  Explain what is happening with each of the following
+```{r addition,echo=TRUE,results='markup'}
+X+2
+```
+
+"When you add a single number (aka a scalar) to a matrix, the scalar is added to each entry in the matrix."
+
+Notice: If we didn't have matrix math, here is what we'd have to do to
+add a scalar to a matrix
+```{r add2,echo=TRUE,tidy=TRUE}
+Xplus2<-matrix(NA,nrow=8,ncol=3)  # Initialize an empty matrix for results
+  # Loop over rows and then over columns
+for(row.entry in 1:8){
+  for(col.entry in 1:3){
+     # Add each element to 2 and record in the Xplus2 matrix
+    Xplus2[row.entry,col.entry]<-X[row.entry,col.entry]+2
+  }
+}
+
+(X+2)==Xplus2   # Same entries
+# An easier check on whether two objects are the same (except for
+# names and such)
+all.equal((X+2),Xplus2,check.attributes=FALSE)
+
+X-2   # Subtraction and addition of a scalar with a matrix are the same: they operate on each element
+```
+
+```{r vecmatadd,echo=TRUE}
+twovec<-matrix(c(2,2,2),nrow=1,ncol=3)  # make a vector of 2s
+twomat<-matrix(2,nrow=8,ncol=3)  # make a matrix of 2s
+```
+
+You'll see some errors appear below. Your job is to explain why R
+failed or made an error. I had to surround these lines in `try()`
+to prevent R from stopping at the error.
+
+```{r vecmatadd2,echo=TRUE,message=TRUE, warning=TRUE, error=TRUE}
+try(X+twovec)
+try( X+t(twovec) )  # Here, you need to explain what t(twovec) does.
+```
+
+```{r matmat,echo=TRUE,results='hide',tidy.opts=list(keep.comment=TRUE)}
+X+twomat
+# Addition/Subtraction is elementwise so two matrices/vectors
+# of the same dimensions can be added/subtracted easily.
+(X+twomat)==(X+2)
+# Adding a matrix full of 2s and adding a scalar 2
+# is the same thing.
+all.equal((X+twomat),(X+2),check.attributes=FALSE)
+all.equal((X+twomat),(twomat+X),check.attributes=FALSE)
+```
+
+```{r self,results='hide',tidy.opts=list(keep.comment=TRUE)}
+X+X
+# X can be added to itself since it amounts to an operation with
+# two matrices of the same size
+```
+
+3. Second, multiplication. Notice that the symbols for scalar
+  multiplication and matrix multiplication are not the same. Try each
+  of the following lines of math in R and explain to yourself (or
+  your colleagues) what happened, and what this means about matrix
+  math.
+
+```{r multiplication,results='hide',tidy.opts=list(keep.comment=FALSE)}
+
+X*2  # Multiplying a scalar by a matrix works elementwise just like addition
+all.equal((X*2),(2*X))  # it is also commutative
+
+X^2  # Exponents work the same way: each element is squared
+
+X^.5  # or X^{1/2}, the square roots of each element
+
+sqrt(X)  # this operator is also elementwise
+
+```
+
+Now, let's get a vector of coefficients to make matrix math link even more
+tightly with what we've already done fitting models to data:
+
+```{r}
+b<-solve(t(X) %*% X) %*% t(X) %*% y
+dim(b)
+```
+
+Now, let's do matrix multiplication the tedious way.  What does this
+function tell us about the rule for doing matrix multiplication?
+
+```{r tediousmult,results='hide',tidy=TRUE,tidy.opts=list(keep.comment=FALSE)}
+
+X.times.b<-matrix(NA,nrow=8,ncol=1)  # Initialize a results matrix
+for(row.entry in 1:8){  # Loop over rows
+  temp<-vector(length=3) #initialize the temp vector
+  for(col.entry in 1:3){  # Loop over columns
+     # For each row, multiply the (row,col) entry in X by the associated col entry in b
+    temp[col.entry]<-X[row.entry,col.entry]*b[col.entry,]
+  }
+  X.times.b[row.entry,]<-sum(temp)  # Sum up the row-times-column entries to get the entry in the matrix X.times.b
+}
+X.times.b
+```
+
+Now, doing part of it by hand:
+```{r byhand,results='hide',tidy.opts=list(keep.comment=TRUE)}
+
+(X[1,1] * b[1])+(X[1,2] * b[2])+(X[1,3] * b[3])  # Matrix multiplication is sum of row-times-column multiplication.
+
+(X[2,1] * b[1])+(X[2,2] * b[2])+(X[2,3] * b[3])
+
+(X[3,1] * b[1])+(X[3,2] * b[2])+(X[3,3] * b[3])
+## etc.... for each row in X
+```
+
+
+And now a little faster (multiplying vectors rather than scalars and
+summing): You can break matrix multiplication into separate vector
+multiplication tasks since vector multiplication also goes
+sum-of-row-times-column.
+```{r vectorized,results='hide',tidy.opts=list(keep.comment=FALSE)}
+X[1,] %*% b # First row of X by b
+X[2,] %*% b # Second row of X by b [b is a single column]
+```
+
+And doing it very fast: This is direct matrix multiplication. So nice
+and clean compared to the previous! Don't we love matrix multiplication?
+```{r fast,results='hide'}
+X %*% b
+```
+
+How does `fitted(thelm)` relate to `X %*% b`? What is ` %*% ` in  ` X %*% b ` (often written $\bX \bb$ or $\bX \hat{\bbeta}$)?
+
+```{r lmstuff}
+thelm<-lm(rpre~medhhi1000+medage,data=news.df)
+fitted(thelm)
+```
+
+
+4. How would you use matrix addition/subtraction to get the residuals once
+  you had $\bX \bb$ (aka `X %*% b`)?
+
+5. Now, let's meet another important matrix:
+
+```{r xtx,error=TRUE,warning=TRUE,message=TRUE}
+# Now another important matrix:
+try(X %*% X)  # why doesn't this work.
+```
+
+```{r xtx2,results='hide'}
+t(X)  # Transpose of X
+
+XtX<-t(X) %*% X  # Aha! t(x) is 3x8 and X is 8x3, so XtX is 3x3
+
+XtX
+```
+
+To make our lives easier, let's mean deviate or center or align all of the variables
+(i.e. set it up so that all of them have mean=0). Now the `XtX`
+matrix will be easier to understand:
+
+
+```{r}
+colmeansvec<-colMeans(X)  # get the means of the columsn of X
+
+colmeansmat<-matrix(rep(colmeansvec,8),ncol=3,byrow=TRUE)
+# Fill a matrix with those means: repeat each row 8 times and stack them
+```
+
+Why would we want a matrix like the following?
+```{r meancent,echo=TRUE,results='hide'}
+X-colmeansmat
+# Subtract the column means from each element of X
+# That is, we are mean-deviating or centering the columns of X
+
+t(apply(X,1,function(x){x-colmeansvec}))
+# This is another way to do the mean-deviating, apply() repeats the
+# same vector subtraction on each row of X, and t(apply()) transposes
+# the result so that it looks like the other results.
+
+# And here is another way to do it:
+sweep(X,2,colmeansvec)  # See the help page for sweep
+```
+
+
+```{r xtx3,results='hide'}
+X.md<-X-colmeansmat
+y.md<-y-mean(y)
+XtX.md<-t(X.md) %*% X.md
+XtX.md
+```
+
+Explain what each entry in `XtX.md` is: if you can, relate those numbers to
+quantities like variances, covariances, sums (of squares or not), sample sizes, do so.
+
+Here another representation of `XtX` that might help you explain and reproduce
+the entries above where $x_{1i}$ and $x_{2i}$ represent the two covariates in
+our prediction model.
+
+$$\bX^{T}\bX=\begin{bmatrix} n & \sum_{i = 1}^{n}{x_{1i}} & \sum_{i =
+    1}^{n}{x_{2i}} \cr \sum_{i = 1}^{n}{x_{1i}} & \sum_{i = 1}^{n}
+  {{x_{1i}}}^2 & \sum_{i = 1}^{n}{x_{1i}}{x_{2i}} \\ \sum_{i =
+    1}^{n}{x_{2i}} & \sum_{i = 1}^{n} {x_{1i}}{x_{2i}} & \sum_{i =
+    1}^{n}{{x_{2i}}}^2 \end{bmatrix}$$
+
+Try some of the following commands to get some other help in understanding what XtX is:
+
+```{r XtX,results='hide',tidy.opts=list(keep.comment=FALSE)}
+sum(X.md[,1])
+
+sum(X.md[,2]^2)
+sum((X.md[,2]-mean(X.md[,2]))^2)  # sum of squared deviations: same as previous because mean(X.md[,2])=0
+sum((X.md[,2]-mean(X.md[,2]))^2)/(8-1)  # The variance of z
+var(X.md[,2])  # Another way to get variance of z
+
+sum(X.md[,2]*X.md[,3])  # why not use %*%? (ans: we want the cross-product for the covariance)
+sum(X.md[,2]*X.md[,3])/(8-1)  # the covariance of z and rpre
+
+cov(X.md)  # see the help file on cov(): The variance-covariance matrix
+
+XtX.md/(8-1)  # The variance-covariance matrix of the x's
+
+```
+
+What about $\bX^{T} \by$? Explain the entries in `Xty.md`
+
+```{r Xty,results='hide',tidy.opts=list(keep.comment=FALSE)}
+t(X.md)  # Transpose of mean-deviated X
+
+y.md  # mean deviated y
+
+Xty.md<-t(X.md) %*% y.md
+Xty.md  # Looks like covariances between the different columns in X and y, with no denominator
+
+cov(cbind(X.md,y.md))  # Verified
+
+Xty.md/7  # Verifies that Xty.md/7 contains the covariances between X and y.
+
+```
+
+The following is a verbal formula for a covariance:
+deviations of x from its mean times deviations of y from its mean
+divided by n-1 (i.e. roughly the average of the product of the deviations)
+```{r xty2,results='hide'}
+sum((X[,2]-mean(X[,2]))*(y-mean(y)))
+sum((X[,2]-mean(X[,2]))*(y-mean(y)))/(8-1)
+
+# Same as above because we've removed the means from X.md and y.md
+sum((X.md[,2])*(y.md))/(8-1)
+
+Xty<-t(X) %*% y
+Xty
+Xty/(8-1)
+```
+
+4. And finally division: Try each of the following lines of math in
+  R and explain to yourself (or your colleagues) what happened
+  (ideally relate what happened to ideas about variances, covariances,
+  sums, etc..)
+
+```{r div,results='hide',tidy.opts=list(keep.comment=FALSE)}
+
+X/2  # divides each element in X by 2
+
+1/X  # the inverse of each element in X (notice the Infinities for the 0s in z)
+
+X^(-1)  # Same as above: 1/X==(X^(-1))
+
+1/X==(X^(-1))
+
+# Now matrix inversion using solve()
+try(solve(X))  # Doesn't work --- requires a square matrix
+
+solve(XtX)  # This works, XtX is square.
+
+dim(XtX)
+dim(Xty)
+
+solve(XtX)%*%Xty  # Least squares!
+
+try(solve(XtX.md))  # Problem with the zeros from the intercept with mean-deviated variables.
+XtX.md<-t(X.md[,2:3])%*%X.md[,2:3]  # So, exclude the intercept (only use columns 2 and 3)
+try(solve(XtX.md))
+
+Xty.md<-t(X.md[,2:3]) %*% y.md
+
+solve(XtX.md) %*% Xty.md
+
+
+```
+
+```{r div2}
+  # Notice that this is not the same as
+(1/XtX) %*% Xty  # Matrix inversion is different from scalar division
+
+# But it is the same as the regressions with mean deviated variables
+lm(I(rpre-mean(rpre))~I(medhhi1000-mean(medhhi1000))+I(medage-mean(medage))-1,data=news.df)
+# orpre
+lm(scale(rpre,scale=FALSE)~scale(medhhi1000,scale=FALSE)+scale(medage,scale=FALSE)-1,data=news.df)
+# or
+lm(y.md~X.md[,2]+X.md[,3]-1)
+
+# And the slopes are the same as the regression with an intercept (and variables on their original scales)
+coef(lm(rpre~medhhi1000+medage,data=news.df))
+```
+6. So, the vector of least squares coefficients is the result of
+  dividing what kind of matrix by what kind of matrix? (what kind of
+  information by what kind of information)? \emph{Hint:} This
+  perspective of "accounting for covariation" is another valid way
+  to think about what least squares is doing [in addition to smoothing
+  conditional means]. They are mathematically equivalent.
+
+
+
+Why should covariances divided by variances amount to differences of
+means, let alone adjusted differences of means?
+
+Here are some definitions of covariance and variance:
+
+$$\cov(X,Y)=\frac{\sum_{i}^{n}(X_i - \bar{X})(Y_i - \bar{Y})}{n-1} $$
+$$\var(X)=\cov(X,X)=\frac{\sum_{i}^{n}(X_i - \bar{X})(X_i - \bar{X})}{n-1}=\frac{\sum_{i}^{n}(X_i - \bar{X})^2}{n-1}
+$$
+
+So, first,
+
+$$\frac{\cov(X,Y)}{\var(X)}=\frac{\sum_{i}^{n}(X_i -
+  \bar{X})(Y_i - \bar{Y})}{\sum_{i}^{n}(X_i - \bar{X})^2}$$
+
+because
+the (n-1) cancels out. (Thus, we had to divide $X^{T}X$ and $X^{T}y$
+by n-1 in the sections above to get the analogous
+covariances/variances). So, this is the bivariate case with
+$y=\beta_0+\beta_1 x_1$. What about $y=\beta_0+\beta_1 x_1+ \beta_2 x_2$?
+
+This becomes notationally messy fast.  Already,
+however, you can get a sense for the idea of deviations from the mean
+being a key ingredient in these calculations.
+
+7.  Why might $\bX \bbeta$ be useful? Let's get back to the question of prediction. So far we have the a model that predicts future turnout with the following squared error:
+
+```{r}
+
+X<-as.matrix(cbind(constant=1,news.df[,c("medhhi1000","medage","blkpct","cands")]))
+y<-news.df$rpre
+bVector<-solve(t(X) %*% X) %*% t(X) %*% y
+yhat<- X %*% bVector
+errors<-news.df$r-yhat
+summary(errors)
+mseOLS<-mean(errors^2) ## mean squared errors, MSE
+
+```
+
+Now, we suspect that we could do better than this from our reading in  @james2013introduction. Here is an example using the lasso. What do you think? Did we do a better job than OLS in this small dataset? What is going on in this code? 
+
+
+```{r}
+
+lassoCriterion<-function(lambda,b,y,X){
+  ## Assumes that the first column of X is all 1s
+  yhat<-X %*% b
+  ehat<-y-yhat
+  l1.penalty<-sum(abs(b[-1])) ## no penalty on intercept
+  thessr<-sum(ehat^2)
+  lassocrit<-thessr+lambda*l1.penalty
+  return(lassocrit)
+}
+
+lassoCriterion(lambda=.5,b=rep(0,ncol(X)),y=y,X=X)
+## Best fit for lambda=.5
+lassoSol<-optim(par=c(0,0,0,0,0),
+             fn=lassoCriterion,
+             method="BFGS",
+             X=X,
+             y=y,
+	     lambda=.5,
+             control=list(trace=1,REPORT=1))
+
+yhatL1<-X %*% lassoSol$par
+errorsL1<-news.df$r-yhatL1
+mseL1<-mean(errorsL1^2)
+
+## Now see if we can find the best value of lambda
+nlambdas<-100
+##results<-matrix(NA,nrow=nlambdas,ncol=nrow(X)+1+1)
+somelambdas<-seq(.001,100,length=nlambdas)
+
+## A function to get lasso criterion coefs and MSE
+
+getlassoMSE<-function(lambda,X,y){
+  lassoSol<-optim(par=rep(0,ncol(X)),
+		  fn=lassoCriterion,
+		  method="BFGS",
+		  X=X,
+		  y=y,
+		  lambda=lambda)
+		  #,control=list(trace=1,REPORT=1))
+
+  yhatL1<-X %*% lassoSol$par
+  errorsL1<-news.df$r-yhatL1
+  mseL1<-mean(errorsL1^2)
+  return(c(par=lassoSol$par,mse=mseL1,lambda=lambda))
+}
+
+results<-sapply(somelambdas,function(l){ getlassoMSE(l,X=X,y=y) })
+## apply(results,1,summary)
+min(results["mse",])>mseOLS
+results["lambda",results["mse",]==min(results["mse",])]
+```
+
+```{r, eval=FALSE}
+
+## To do this even faster:
+library(glmnet)
+lassoFits<-glmnet(x=X[,-1],y=y,alpha=.5) ## using an elastic net fit rather than strict lasso
+par(mar=c(6,2,3,1),mgp=c(1.5,.5,0))
+plot(lassoFits,xvar="lambda",label=TRUE)
+## This next line add the raw lambdas since the default plot shows only the log transformed lambdas
+axis(1,line=2,at=log(lassoFits$lambda),labels=round(lassoFits$lambda,3))
+abline(h=0,col="gray",lwd=.5)
+```
+
+```{r eval=FALSE}
+
+getMSEs<-function(B,X,obsy){
+  yhats <- apply(B,2,function(b){ X %*% b })
+  ehats <- apply(yhats,2,function(y){ obsy - y })
+  apply(ehats,2,function(e){ mean(e^2) })
+}
+
+getMSEs(B=coef(lassoFits),X=X,obsy=y)
+```
+
+Hmmm.... should the MSE always just go down? I wonder what @james2013introduction has to say about this.^[I suspect that @james2013introduction would recommend cross-validation --- but we only have 8 observations here, so that would be difficult.]
+
+Now, more benefits of penalized models. Imagine this model:
+
+```{r}
+newmodel<-rpre ~ blkpct*medhhi1000*medage*cands
+lm4<-lm(newmodel,news.df)
+X<-model.matrix(newmodel,data=news.df)
+
+try(b<-solve(t(X) %*% X) %*% X %*% y)
+
+lsCriterion2<-function(b,y,X){
+  yhat<-X %*% b
+  ehat<-y-yhat
+  thessr<-sum(ehat^2)
+  return(thessr)
+}
+
+lsSolution1<-optim(fn=lsCriterion2,par=rep(0,ncol(X)),X=X,y=y,method="BFGS",control=list(trace=1,REPORT=1,maxit=5000))
+lsSolution1
+
+lsSolution2<-optim(fn=lsCriterion2,par=rep(100,ncol(X)),X=X,y=y,method="BFGS",control=list(trace=1,REPORT=1,maxit=5000))
+lsSolution2
+
+lsSolution3<-optim(fn=lsCriterion2,par=rep(-100,ncol(X)),X=X,y=y,method="BFGS",control=list(trace=1,REPORT=1,maxit=5000))
+lsSolution3
+
+cbind(lsSolution1$par,lsSolution2$par,lsSolution3$par)
+
+## Notice that we are not standardizing the columns of X here. Should do that for real use.
+ridgeCriterion<-function(lambda,b,y,X){
+  ## Assumes that the first column of X is all 1s
+  yhat<-X %*% b
+  ehat<-y-yhat
+  l2.penalty<-sum(b[-1]^2) ## no penalty on intercept
+  thessr<-sum(ehat^2)
+  lassocrit<-thessr+lambda*l2.penalty
+  return(lassocrit)
+}
+
+
+ridgeSolution1<-optim(fn=ridgeCriterion,par=rep(0,ncol(X)),lambda=.5,X=X,y=y,method="BFGS",control=list(trace=1,REPORT=1,maxit=5000))
+ridgeSolution1
+
+ridgeSolution2<-optim(fn=ridgeCriterion,par=rep(100,ncol(X)),lambda=.5,X=X,y=y,method="BFGS",control=list(trace=1,REPORT=1,maxit=5000))
+ridgeSolution2
+
+ridgeSolution3<-optim(fn=ridgeCriterion,par=rep(-100,ncol(X)),lambda=.5,X=X,y=y,method="BFGS",control=list(trace=1,REPORT=1,maxit=5000))
+ridgeSolution3
+
+cbind(ridgeSolution1$par,ridgeSolution2$par,ridgeSolution3$par)
+
+## A sketch of Cross-validation to choose lambda: here using 3-fold because of the small dataset
+cvfn<-function(){
+  testids<-sample(1:nrow(X),nrow(X)/3)
+  trainingids <- (1:nrow(X))[-testids]
+  ## Fit
+  ## Predict yhat for testids
+  ## MSE for y_test versus yhat_test
+}
+
+## Average of the MSE across folds is CV MSE
+
+
+
+```
+
+# References
+
+
+
+

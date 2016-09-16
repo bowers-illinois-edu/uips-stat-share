@@ -1,0 +1,118 @@
+---
+title: 'Exploration 4: Two Variables Relationships as Causal Relationships'
+author: "Jake Bowers"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  pdf_document:
+    fig_crop: no
+    fig_width: 7
+    fig_height: 4
+  html_document:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 4
+geometry: margin=1in
+graphics: yes
+fontsize: 10pt
+bibliography: classbib.bib
+---
+
+<!-- Make this document using library(rmarkdown); render("exploration1.Rmd") -->
+\input{mytexsymbols}
+
+
+```{r include=FALSE, cache=FALSE}
+# Some customization.  You can alter or delete as desired (if you know what you are doing).
+# knitr settings to control how R chunks work.
+
+## To make the html file do
+## render("exploration1.Rmd",output_format=html_document(fig_retina=FALSE))
+## To make the pdf file do
+## render("exploration1.Rmd",output_format=pdf_document())
+
+require(knitr)
+opts_chunk$set(
+  tidy=T,
+  tidy.opts=list(width.cutoff=70), # Trying to fix code from running off page
+  size="small",
+  echo=TRUE,
+  results='markup',
+  strip.white=TRUE,
+  fig.path='figs/fig',
+  cache=FALSE,
+  highlight=TRUE,
+  size='footnotesize',
+  fig.retina=FALSE,
+  message=FALSE,
+  comment=NA)
+```
+
+
+```{r datasetup, cache=F}
+download.file("http://jakebowers.org/Data/ANES/anes_pilot_2016_csv.zip", 
+              destfile="anespilot2016.csv.zip")
+unzip("anespilot2016.csv.zip")
+anespi16<-read.csv("anes_pilot_2016.csv",as.is=TRUE,strip.white=TRUE)
+```
+
+You friend calls back. "I really appreciated all of the work that you did with
+describing the relationships between age and Trump support. Of course, as soon
+as your results came in, the team began to bicker: "Older people like Trump
+because they are just inherently conservative. It is not age __per se__ that causes
+this relationship, but the fact that ideology changes over time within the life
+span." Then the others argued, "First, there is no fact that ideology changes
+over time within the life span. Second, I think that this relationship just
+shows that people who are older have had more time to dislike Clinton --- the
+young people don't know that much about the Clintons, and so they are not yet
+disillusioned." And other group argued, "So one of you is saying that age
+causes Trump support because ideology is related to age? And the other is that
+age causes Trump support because political knowledge and experience is related
+to age? But, both of you seem to be ignoring the nonlinear descriptions that we
+did. Didn't it seem like there were different age groups that responded to
+Trump differently? Don't you think that this is caused by the fact that the
+ethnic composition of the country has changed, and that Trump consistently
+offends non-white voters? That is, that the relationship is caused by the
+underlying relationship between age and ethnicity and Trump's offensive
+comments?"
+
+"I started to try to calm the waters in my team, but I only go this far."
+
+```{r}
+require(knitr)
+table(anespi16$fttrump,useNA="ifany")
+# kable(t(as.matrix(table(anespi16$fttrump,useNA="ifany"))))
+table(anespi16$birthyr,useNA="ifany")
+
+anespi16$fttrump[anespi16$fttrump==998]<-NA
+anespi16$age <- 2016-anespi16$birthyr
+
+summary(anespi16$age)
+summary(anespi16$fttrump)
+```
+
+"First, I was getting confused about the use of the word, 'cause'. I didn't quite know what they meant. And, I didn't know how to start using the data on hand to engage with these alternative causal explanations if I didn't know what they meant by cause. The problem is now that I'm back abroad, I can't ask them. What is your best guess? Can you explain it to me? For example, why would thinking about cause one way help me use data to engage with these kinds of arguments? And, of course, I'm relying on you for your advice about which explanation is correct. Please help!  I'm also wondering about your own favorite explanation. One that is not one of those three. What is it? What is the evidence in favor of it or against it?"
+
+# Age and Trumpt Support (Starting Point)
+Let's try to map this out and think about the relationships visually. One suggestion is that it's not age, but ideology that drives trumpt support. So what would that look like graphically? [see here](http://docs.ggplot2.org/0.9.3.1/stat_smooth.html)  
+
+```{r}
+# Here's the long way of doing a recode. I could have also used "pid" or party ID, but party and ideology could be very different 
+table(anespi16$ideo5, exclude = NULL)
+
+anespi16$ideo3 <- NA
+anespi16$ideo3[which(anespi16$ideo5 <= 2)] <- "Liberal"
+anespi16$ideo3[which(anespi16$ideo5 == 3)] <- "Moderate"
+anespi16$ideo3[which(anespi16$ideo5 >= 4)] <- "Conservative"
+anespi16$ideo3[which(anespi16$ideo5 == 6)] <- "Not Sure"
+
+table(anespi16$ideo3, exclude = NULL)
+
+require(ggplot2)
+ggplot(anespi16, aes(x=age, y=fttrump)) + 
+  stat_smooth(method=lm, aes(fill = factor(ideo3), color= factor(ideo3)), se=F)
+```
+
+Okay, so many there is a different relationship depending on age? What's the ideal comparison for us to make? 
+
+
+# References

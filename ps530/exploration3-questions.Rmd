@@ -100,7 +100,8 @@ What should the regression output look like for non-linear functions? Here's a q
 
 > At the moment we're working on running the smooth.spline function - although R lets us run the function, when we call up the coefficients, it results in NULL, and when we check the sum of squares of residuals, we also get 0, even when changing the degrees of freedom in our smooth.spline function.  
 
-```{r, eval = F}
+```{r, eval = T}
+require(splines)
 globalNonLinear <- smooth.spline(anespi16$fttrump, anespi16$birthyr, df=6)
 
 # So these are what we use for linear models, but what happens when you apply them to non-linear models --- the smooth.spline() function specifically. 
@@ -117,9 +118,34 @@ ls(globalNonLinear)
 
 So here are some bigger questions that might help lead to an answer. If a linear model is a slope and an intercept, what defines a spline? The [documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/smooth.spline.html) may help you find the answer. How would you get residuals out of the spline model? How would you graph it?  
 
-```{r, eval = F, include=F}
+
+# Local or Global? Bias and Variance.  
+As you continue to consider the exploration, think about the following:  
+
+A) This bureaucrat discusses "local" versus "global" smoothers. What is a local smoother? What is a global one? How many ways are there to achieve smoothness? Is there anything in between? Consider the following code chunk using piecewise linear splines.  
+```{r}
+wrkdata <- subset(anespi16, fttrump <=100)
+# linear
+linearM <- lm(fttrump ~ birthyr, data=wrkdata)
+# one df
+fitX <- lm(fttrump ~ bs(birthyr, df = 3), data=wrkdata)
+summary(fitX)
+
+
+# If you have questions about for loops still, you can find an example in the shared dailyR folder
+residualHolder <- as.vector(NULL)
+modelObjects <- as.list(NULL)
+
+for(i in 1:20){
+  
+}
+
 sum(residuals(globalNonLinear)^2)
 ```
+
+What values (there are multiple) determine the flexibility of the spline approach? To extend this, consider how you would explore the polynomial approach in the same way. Is the polynomial approach local, or global?  
+
+B) What do James et al mean when they discuss the bias-variance trade off? How does this relate to the choice presented in this exploration? What does this mean in substantive (who votes for Trump) terms? What is the goal of the person who is asking you questions -- is it prediction or explanation?  
 
 
 
