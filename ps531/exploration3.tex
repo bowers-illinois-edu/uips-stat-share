@@ -1,0 +1,1504 @@
+\documentclass[10pt,]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+  \newcommand{\euro}{€}
+    \setmainfont[]{Courier}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\PassOptionsToPackage{usenames,dvipsnames}{color} % color is loaded by hyperref
+\hypersetup{unicode=true,
+            pdftitle={Exploration 3: Matrices make life easier.},
+            pdfauthor={Jake Bowers},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{Exploration 3: Matrices make life easier.}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{Jake Bowers}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \predate{\centering\large\emph}
+  \postdate{\par}
+  \date{September 17, 2016}
+
+
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{fontspec}
+\usepackage{bm}
+\newfontfamily\unicodefont[Ligatures=TeX]{Courier}
+\newfontfamily\themainfont[Ligatures=TeX]{Courier}
+\newfontfamily\grouptwofont[Ligatures=TeX]{Courier}
+\newfontfamily\groupthreefont[Ligatures=TeX]{Courier}
+\DeclareTextCommandDefault{\nobreakspace}{\leavevmode\nobreak\ }
+
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+\begin{document}
+\maketitle
+
+\input{mytexsymbols}
+
+So far you have received no new communication from the UN. However, you
+did find an envelope full of cash with a cheery note saying ``Thanks
+from the United Nations!'' when you looked in your backpack. After you
+stopped wondering how someone had put the envelope into your bag, you
+receive a WhatsApp from another old friend. He is from one of the new
+political analytics firms that started to grow during the Obama campaign
+in the USA and he has a prediction problem. He has a small dataset of 8
+cities and would like to predict current voting turnout in those cities
+based on a complex model. He says, ``My last analyst provided the
+following code to fit my model but then stopped. I think that the best
+model of voting turnout uses median household income, median age, racial
+diversity (here, percent african american), and the number of candidates
+running for this city council office. I told the analyst this model and
+he provided the following code. Can you help me?''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{news.df<-}\KeywordTok{read.csv}\NormalTok{(}\StringTok{"http://jakebowers.org/Data/news.df.csv"}\NormalTok{)}
+\NormalTok{news.df$sF<-}\KeywordTok{factor}\NormalTok{(news.df$s)}
+\end{Highlighting}
+\end{Shaded}
+
+``I really don't understand the lsCriterion function. Can you write out
+the criterion using math and explain it to me in plain language? I'm
+always especially interested in understanding \textbf{why} these stats
+types are doing this stuff, and I'm so grateful that you can explain it
+simply and plainly to me.''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lsCriterion<-function(b,y,X)\{}
+  \NormalTok{yhat<-b[}\DecValTok{1}\NormalTok{]*X[,}\DecValTok{1}\NormalTok{]+b[}\DecValTok{2}\NormalTok{]*X[,}\DecValTok{2}\NormalTok{]+b[}\DecValTok{3}\NormalTok{]*X[,}\DecValTok{3}\NormalTok{]+b[}\DecValTok{4}\NormalTok{]*X[,}\DecValTok{4}\NormalTok{]+b[}\DecValTok{5}\NormalTok{]*X[,}\DecValTok{5}\NormalTok{]}
+  \NormalTok{ehat<-y-yhat}
+  \NormalTok{thessr<-}\KeywordTok{sum}\NormalTok{(ehat^}\DecValTok{2}\NormalTok{)}
+  \KeywordTok{return}\NormalTok{(thessr)}
+\NormalTok{\}}
+
+\NormalTok{X<-}\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{constant=}\DecValTok{1}\NormalTok{,news.df[,}\KeywordTok{c}\NormalTok{(}\StringTok{"medhhi1000"}\NormalTok{,}\StringTok{"medage"}\NormalTok{,}\StringTok{"blkpct"}\NormalTok{,}\StringTok{"cands"}\NormalTok{)]))}
+\NormalTok{y<-news.df$rpre}
+\end{Highlighting}
+\end{Shaded}
+
+``He said to `try some different vectors' and I think that this meant
+that I was to guess about the values for the coefficients in the model
+and that, after trying a bunch, I would choose the vector that I liked
+best. So, for example, I tried a model with all zeros:''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{lsCriterion}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{X=}\NormalTok{X)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 6329
+\end{verbatim}
+
+And then tried to see a bunch of other models.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{12345}\NormalTok{)}
+\KeywordTok{lsCriterion}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{X=}\NormalTok{X) ## hmm..ok... can I do better?}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 90693
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{lsCriterion}\NormalTok{(}\KeywordTok{runif}\NormalTok{(}\DecValTok{5}\NormalTok{,-}\DecValTok{100}\NormalTok{,}\DecValTok{100}\NormalTok{),}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{X=}\NormalTok{X) ## bad}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 218105731
+\end{verbatim}
+
+``After trying a bunch of models, however, I started to get tired. Can
+you help me do this faster? I asked the analyst (who is really a
+construction engineer and not a statistician) if I could use a loop but
+he said it would be better to `try to optimize the objective function'
+and this is as far as I got.''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lsSolution<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{fn=}\NormalTok{lsCriterion,}\DataTypeTok{par=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y,}
+          \DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}\DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 6329.000000 
+iter   2 value 2427.613241
+iter   3 value 2299.647197
+iter   4 value 1996.222734
+iter   5 value 1988.986737
+iter   6 value 1079.199017
+iter   7 value 908.053870
+iter   8 value 888.270807
+iter   9 value 872.716838
+iter  10 value 872.526305
+iter  11 value 872.522390
+iter  11 value 872.522388
+iter  11 value 872.522388
+final  value 872.522388 
+converged
+\end{verbatim}
+
+``Is this the best solution? How well does this model predict the actual
+outcome (\texttt{r}) (this model uses baseline turnout or
+\texttt{rpre}). Can you give me some quantitative measure of how well
+our model predicted the outcome? I think that you can use the code from
+the \texttt{lsCriterion} function to develop predictions and compare our
+predictions to the actual turnout observed (the variable \texttt{r}),
+right?''
+
+``Now, I wanted to add another variable to see how well that new model
+fit. For example, maybe \texttt{blkpct} has a curvilinear relationship
+with the outcome. I complained to the analyst that I would have to
+re-write the function every time that I had a new model. So, the analyst
+said, `Use matrices.' and he sent this:''
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bVector<-}\KeywordTok{solve}\NormalTok{(}\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{X) %*%}\StringTok{ }\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{y}
+\NormalTok{yhat<-}\StringTok{ }\NormalTok{X %*%}\StringTok{ }\NormalTok{bVector}
+\NormalTok{ehat<-y-yhat}
+\KeywordTok{summary}\NormalTok{(ehat)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       V1         
+ Min.   :-15.063  
+ 1st Qu.: -8.575  
+ Median :  0.199  
+ Mean   :  0.000  
+ 3rd Qu.:  5.656  
+ Max.   : 17.094  
+\end{verbatim}
+
+``Now, I'm very impressed at the speed and conciseness of this! I mean,
+he got the same vector of coefficients in like 1/1000 the time that it
+took me to search for a solution --- even using a fast optimizer. Also,
+he got the predictions very quickly too! But I'm confused about how this
+works. I understand the idea of proposing different values for the
+different coefficients and then asking how well they do --- in a sum of
+squared error sense. But the three lines that create \texttt{bVector}
+and \texttt{yhat} and even \texttt{ehat} are a mystery and I worry that
+they are not actually comparing my predictions of past turnout to
+observed future turnout (\texttt{rpre} versus \texttt{r}). Maybe you can
+help? I asked the analyst to provide a little guidance to help you get
+practice with these ideas.''
+
+So, you need to be able to explain what is happening when we tell R to
+do least squares with the matrix \(\bm{X}\) and vector \(\bm{Y}\) via
+\((\bm{X}^{T}\bm{X})^{-1}\bm{X}^{T}\bm{Y}\) using the command
+\texttt{solve(t(X)\%*\%X)\%*\%(t(X)\%*\%y)}. Where
+\texttt{t(X)}\(\equiv \bm{X}^{T}\) (meaning the transpose of \(\bm{X}\))
+and \texttt{solve(X)}\(\equiv \bm{X}^{-1}\) (meaning the inverse of
+\(\bm{X}\)).
+
+Here are some steps you might take to produce this explanation.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  First, let's create a \(\bm{X}\) matrix using the newspapers data to
+  do a regression of the form
+  \texttt{baseline.turnoutx\textasciitilde{}income+median\ age} (where
+  baseline.turnout is \texttt{rpre} and income is \texttt{medhhi1000}
+  and median age of the city is \texttt{medage}). Here is how one might
+  do this in R for both \(\bm{X}\) and \(\bm{Y}\) (where, \textbf{bold}
+  represents matrices or vectors):
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X<-}\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DecValTok{1}\NormalTok{,news.df$medhhi1000,news.df$medage))  }\CommentTok{# "bind" together columns from the data and an intercept}
+\NormalTok{y<-}\KeywordTok{matrix}\NormalTok{(news.df$rpre,}\DataTypeTok{ncol=}\DecValTok{1}\NormalTok{) }\CommentTok{# not strictly necessary, y<-news.df$rpre would also work}
+
+\CommentTok{# Look at the objects}
+\NormalTok{X}
+\NormalTok{y}
+
+\CommentTok{# Structure of the objects}
+\KeywordTok{str}\NormalTok{(X)}
+\KeywordTok{str}\NormalTok{(y)}
+
+\CommentTok{#Look at the dimensions of the objects: number rows by number columns}
+\KeywordTok{dim}\NormalTok{(X)}
+\KeywordTok{dim}\NormalTok{(y)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{itemize}
+\tightlist
+\item
+  Explain how we created the \(\bm{X}\) matrix \emph{Hint:} The column
+  of 1s has to do with the intercept or constant term.
+\item
+  What do the columns of \(\bm{X}\) represent?
+\item
+  What do the rows represent?
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  First, addition and subtraction: Try each of the following lines of
+  math in R and explain to yourself (or your colleagues) what happened,
+  and what this means about matrix math. I did the first one as an
+  example.
+\end{enumerate}
+
+Explain what is happening with each of the following
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X}\DecValTok{+2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     [,1]  [,2] [,3]
+[1,]    3 28.48 32.7
+[2,]    3 39.43 35.4
+[3,]    3 37.49 36.7
+[4,]    3 50.44 38.2
+[5,]    3 27.16 23.3
+[6,]    3 41.19 33.4
+[7,]    3 31.48 33.4
+[8,]    3 55.09 39.7
+\end{verbatim}
+
+``When you add a single number (aka a scalar) to a matrix, the scalar is
+added to each entry in the matrix.''
+
+Notice: If we didn't have matrix math, here is what we'd have to do to
+add a scalar to a matrix
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Xplus2 <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \DecValTok{8}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{3}\NormalTok{)  }\CommentTok{# Initialize an empty matrix for results}
+\CommentTok{# Loop over rows and then over columns}
+\NormalTok{for (row.entry in }\DecValTok{1}\NormalTok{:}\DecValTok{8}\NormalTok{) \{}
+    \NormalTok{for (col.entry in }\DecValTok{1}\NormalTok{:}\DecValTok{3}\NormalTok{) \{}
+        \CommentTok{# Add each element to 2 and record in the Xplus2 matrix}
+        \NormalTok{Xplus2[row.entry, col.entry] <-}\StringTok{ }\NormalTok{X[row.entry, col.entry] +}\StringTok{ }\DecValTok{2}
+    \NormalTok{\}}
+\NormalTok{\}}
+
+\NormalTok{(X +}\StringTok{ }\DecValTok{2}\NormalTok{) ==}\StringTok{ }\NormalTok{Xplus2  }\CommentTok{# Same entries}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     [,1] [,2] [,3]
+[1,] TRUE TRUE TRUE
+[2,] TRUE TRUE TRUE
+[3,] TRUE TRUE TRUE
+[4,] TRUE TRUE TRUE
+[5,] TRUE TRUE TRUE
+[6,] TRUE TRUE TRUE
+[7,] TRUE TRUE TRUE
+[8,] TRUE TRUE TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# An easier check on whether two objects are the same (except for names and such)}
+\KeywordTok{all.equal}\NormalTok{((X +}\StringTok{ }\DecValTok{2}\NormalTok{), Xplus2, }\DataTypeTok{check.attributes =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X -}\StringTok{ }\DecValTok{2}  \CommentTok{# Subtraction and addition of a scalar with a matrix are the same: they operate on each element}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+     [,1]  [,2] [,3]
+[1,]   -1 24.48 28.7
+[2,]   -1 35.43 31.4
+[3,]   -1 33.49 32.7
+[4,]   -1 46.44 34.2
+[5,]   -1 23.16 19.3
+[6,]   -1 37.19 29.4
+[7,]   -1 27.48 29.4
+[8,]   -1 51.09 35.7
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{twovec<-}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{),}\DataTypeTok{nrow=}\DecValTok{1}\NormalTok{,}\DataTypeTok{ncol=}\DecValTok{3}\NormalTok{)  }\CommentTok{# make a vector of 2s}
+\NormalTok{twomat<-}\KeywordTok{matrix}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DataTypeTok{nrow=}\DecValTok{8}\NormalTok{,}\DataTypeTok{ncol=}\DecValTok{3}\NormalTok{)  }\CommentTok{# make a matrix of 2s}
+\end{Highlighting}
+\end{Shaded}
+
+You'll see some errors appear below. Your job is to explain why R failed
+or made an error. I had to surround these lines in \texttt{try()} to
+prevent R from stopping at the error.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{try}\NormalTok{(X+twovec)}
+\KeywordTok{try}\NormalTok{( X+}\KeywordTok{t}\NormalTok{(twovec) )  }\CommentTok{# Here, you need to explain what t(twovec) does.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X+twomat}
+\CommentTok{# Addition/Subtraction is elementwise so two matrices/vectors}
+\CommentTok{# of the same dimensions can be added/subtracted easily.}
+\NormalTok{(X+twomat)==(X}\DecValTok{+2}\NormalTok{)}
+\CommentTok{# Adding a matrix full of 2s and adding a scalar 2}
+\CommentTok{# is the same thing.}
+\KeywordTok{all.equal}\NormalTok{((X+twomat),(X}\DecValTok{+2}\NormalTok{),}\DataTypeTok{check.attributes=}\OtherTok{FALSE}\NormalTok{)}
+\KeywordTok{all.equal}\NormalTok{((X+twomat),(twomat+X),}\DataTypeTok{check.attributes=}\OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X+X}
+\CommentTok{# X can be added to itself since it amounts to an operation with}
+\CommentTok{# two matrices of the same size}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Second, multiplication. Notice that the symbols for scalar
+  multiplication and matrix multiplication are not the same. Try each of
+  the following lines of math in R and explain to yourself (or your
+  colleagues) what happened, and what this means about matrix math.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X*}\DecValTok{2}  \CommentTok{# Multiplying a scalar by a matrix works elementwise just like addition}
+\KeywordTok{all.equal}\NormalTok{((X*}\DecValTok{2}\NormalTok{),(}\DecValTok{2}\NormalTok{*X))  }\CommentTok{# it is also commutative}
+
+\NormalTok{X^}\DecValTok{2}  \CommentTok{# Exponents work the same way: each element is squared}
+
+\NormalTok{X^.}\DecValTok{5}  \CommentTok{# or X^\{1/2\}, the square roots of each element}
+
+\KeywordTok{sqrt}\NormalTok{(X)  }\CommentTok{# this operator is also elementwise}
+\end{Highlighting}
+\end{Shaded}
+
+Now, let's get a vector of coefficients to make matrix math link even
+more tightly with what we've already done fitting models to data:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{b<-}\KeywordTok{solve}\NormalTok{(}\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{X) %*%}\StringTok{ }\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{y}
+\KeywordTok{dim}\NormalTok{(b)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 3 1
+\end{verbatim}
+
+Now, let's do matrix multiplication the tedious way. What does this
+function tell us about the rule for doing matrix multiplication?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X.times.b <-}\StringTok{ }\KeywordTok{matrix}\NormalTok{(}\OtherTok{NA}\NormalTok{, }\DataTypeTok{nrow =} \DecValTok{8}\NormalTok{, }\DataTypeTok{ncol =} \DecValTok{1}\NormalTok{)}
+\NormalTok{for (row.entry in }\DecValTok{1}\NormalTok{:}\DecValTok{8}\NormalTok{) \{}
+    \NormalTok{temp <-}\StringTok{ }\KeywordTok{vector}\NormalTok{(}\DataTypeTok{length =} \DecValTok{3}\NormalTok{)}
+    \NormalTok{for (col.entry in }\DecValTok{1}\NormalTok{:}\DecValTok{3}\NormalTok{) \{}
+        \NormalTok{temp[col.entry] <-}\StringTok{ }\NormalTok{X[row.entry, col.entry] *}\StringTok{ }\NormalTok{b[col.entry, ]}
+    \NormalTok{\}}
+    \NormalTok{X.times.b[row.entry, ] <-}\StringTok{ }\KeywordTok{sum}\NormalTok{(temp)}
+\NormalTok{\}}
+\NormalTok{X.times.b}
+\end{Highlighting}
+\end{Shaded}
+
+Now, doing part of it by hand:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{(X[}\DecValTok{1}\NormalTok{,}\DecValTok{1}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{1}\NormalTok{])+(X[}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{2}\NormalTok{])+(X[}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{3}\NormalTok{])  }\CommentTok{# Matrix multiplication is sum of row-times-column multiplication.}
+
+\NormalTok{(X[}\DecValTok{2}\NormalTok{,}\DecValTok{1}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{1}\NormalTok{])+(X[}\DecValTok{2}\NormalTok{,}\DecValTok{2}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{2}\NormalTok{])+(X[}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{3}\NormalTok{])}
+
+\NormalTok{(X[}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{1}\NormalTok{])+(X[}\DecValTok{3}\NormalTok{,}\DecValTok{2}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{2}\NormalTok{])+(X[}\DecValTok{3}\NormalTok{,}\DecValTok{3}\NormalTok{] *}\StringTok{ }\NormalTok{b[}\DecValTok{3}\NormalTok{])}
+\NormalTok{## etc.... for each row in X}
+\end{Highlighting}
+\end{Shaded}
+
+And now a little faster (multiplying vectors rather than scalars and
+summing): You can break matrix multiplication into separate vector
+multiplication tasks since vector multiplication also goes
+sum-of-row-times-column.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X[}\DecValTok{1}\NormalTok{,] %*%}\StringTok{ }\NormalTok{b }\CommentTok{# First row of X by b}
+\NormalTok{X[}\DecValTok{2}\NormalTok{,] %*%}\StringTok{ }\NormalTok{b }\CommentTok{# Second row of X by b [b is a single column]}
+\end{Highlighting}
+\end{Shaded}
+
+And doing it very fast: This is direct matrix multiplication. So nice
+and clean compared to the previous! Don't we love matrix multiplication?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X %*%}\StringTok{ }\NormalTok{b}
+\end{Highlighting}
+\end{Shaded}
+
+How does \texttt{fitted(thelm)} relate to \texttt{X\ \%*\%\ b}? What is
+\texttt{\%*\%} in \texttt{X\ \%*\%\ b} (often written \(\bm{X} \bm{b}\)
+or \(\bm{X} \hat{\bm{\beta}}\))?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{thelm<-}\KeywordTok{lm}\NormalTok{(rpre~medhhi1000+medage,}\DataTypeTok{data=}\NormalTok{news.df)}
+\KeywordTok{fitted}\NormalTok{(thelm)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+    1     2     3     4     5     6     7     8 
+23.94 24.97 24.09 25.98 27.40 26.10 24.23 26.28 
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\item
+  How would you use matrix addition/subtraction to get the residuals
+  once you had \(\bm{X} \bm{b}\) (aka \texttt{X\ \%*\%\ b})?
+\item
+  Now, let's meet another important matrix:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Now another important matrix:}
+\KeywordTok{try}\NormalTok{(X %*%}\StringTok{ }\NormalTok{X)  }\CommentTok{# why doesn't this work.}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{t}\NormalTok{(X)  }\CommentTok{# Transpose of X}
+
+\NormalTok{XtX<-}\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{X  }\CommentTok{# Aha! t(x) is 3x8 and X is 8x3, so XtX is 3x3}
+
+\NormalTok{XtX}
+\end{Highlighting}
+\end{Shaded}
+
+To make our lives easier, let's mean deviate or center or align all of
+the variables (i.e.~set it up so that all of them have mean=0). Now the
+\texttt{XtX} matrix will be easier to understand:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{colmeansvec<-}\KeywordTok{colMeans}\NormalTok{(X)  }\CommentTok{# get the means of the columsn of X}
+
+\NormalTok{colmeansmat<-}\KeywordTok{matrix}\NormalTok{(}\KeywordTok{rep}\NormalTok{(colmeansvec,}\DecValTok{8}\NormalTok{),}\DataTypeTok{ncol=}\DecValTok{3}\NormalTok{,}\DataTypeTok{byrow=}\OtherTok{TRUE}\NormalTok{)}
+\CommentTok{# Fill a matrix with those means: repeat each row 8 times and stack them}
+\end{Highlighting}
+\end{Shaded}
+
+Why would we want a matrix like the following?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X-colmeansmat}
+\CommentTok{# Subtract the column means from each element of X}
+\CommentTok{# That is, we are mean-deviating or centering the columns of X}
+
+\KeywordTok{t}\NormalTok{(}\KeywordTok{apply}\NormalTok{(X,}\DecValTok{1}\NormalTok{,function(x)\{x-colmeansvec\}))}
+\CommentTok{# This is another way to do the mean-deviating, apply() repeats the}
+\CommentTok{# same vector subtraction on each row of X, and t(apply()) transposes}
+\CommentTok{# the result so that it looks like the other results.}
+
+\CommentTok{# And here is another way to do it:}
+\KeywordTok{sweep}\NormalTok{(X,}\DecValTok{2}\NormalTok{,colmeansvec)  }\CommentTok{# See the help page for sweep}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X.md<-X-colmeansmat}
+\NormalTok{y.md<-y-}\KeywordTok{mean}\NormalTok{(y)}
+\NormalTok{XtX.md<-}\KeywordTok{t}\NormalTok{(X.md) %*%}\StringTok{ }\NormalTok{X.md}
+\NormalTok{XtX.md}
+\end{Highlighting}
+\end{Shaded}
+
+Explain what each entry in \texttt{XtX.md} is: if you can, relate those
+numbers to quantities like variances, covariances, sums (of squares or
+not), sample sizes, do so.
+
+Here another representation of \texttt{XtX} that might help you explain
+and reproduce the entries above where \(x_{1i}\) and \(x_{2i}\)
+represent the two covariates in our prediction model.
+
+\[\bm{X}^{T}\bm{X}=\begin{bmatrix} n & \sum_{i = 1}^{n}{x_{1i}} & \sum_{i =
+    1}^{n}{x_{2i}} \cr \sum_{i = 1}^{n}{x_{1i}} & \sum_{i = 1}^{n}
+  {{x_{1i}}}^2 & \sum_{i = 1}^{n}{x_{1i}}{x_{2i}} \\ \sum_{i =
+    1}^{n}{x_{2i}} & \sum_{i = 1}^{n} {x_{1i}}{x_{2i}} & \sum_{i =
+    1}^{n}{{x_{2i}}}^2 \end{bmatrix}\]
+
+Try some of the following commands to get some other help in
+understanding what XtX is:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{(X.md[,}\DecValTok{1}\NormalTok{])}
+
+\KeywordTok{sum}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{]^}\DecValTok{2}\NormalTok{)}
+\KeywordTok{sum}\NormalTok{((X.md[,}\DecValTok{2}\NormalTok{]-}\KeywordTok{mean}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{]))^}\DecValTok{2}\NormalTok{)  }\CommentTok{# sum of squared deviations: same as previous because mean(X.md[,2])=0}
+\KeywordTok{sum}\NormalTok{((X.md[,}\DecValTok{2}\NormalTok{]-}\KeywordTok{mean}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{]))^}\DecValTok{2}\NormalTok{)/(}\DecValTok{8-1}\NormalTok{)  }\CommentTok{# The variance of z}
+\KeywordTok{var}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{])  }\CommentTok{# Another way to get variance of z}
+
+\KeywordTok{sum}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{]*X.md[,}\DecValTok{3}\NormalTok{])  }\CommentTok{# why not use %*%? (ans: we want the cross-product for the covariance)}
+\KeywordTok{sum}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{]*X.md[,}\DecValTok{3}\NormalTok{])/(}\DecValTok{8-1}\NormalTok{)  }\CommentTok{# the covariance of z and rpre}
+
+\KeywordTok{cov}\NormalTok{(X.md)  }\CommentTok{# see the help file on cov(): The variance-covariance matrix}
+
+\NormalTok{XtX.md/(}\DecValTok{8-1}\NormalTok{)  }\CommentTok{# The variance-covariance matrix of the x's}
+\end{Highlighting}
+\end{Shaded}
+
+What about \(\bm{X}^{T} \bm{Y}\)? Explain the entries in \texttt{Xty.md}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{t}\NormalTok{(X.md)  }\CommentTok{# Transpose of mean-deviated X}
+
+\NormalTok{y.md  }\CommentTok{# mean deviated y}
+
+\NormalTok{Xty.md<-}\KeywordTok{t}\NormalTok{(X.md) %*%}\StringTok{ }\NormalTok{y.md}
+\NormalTok{Xty.md  }\CommentTok{# Looks like covariances between the different columns in X and y, with no denominator}
+
+\KeywordTok{cov}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(X.md,y.md))  }\CommentTok{# Verified}
+
+\NormalTok{Xty.md/}\DecValTok{7}  \CommentTok{# Verifies that Xty.md/7 contains the covariances between X and y.}
+\end{Highlighting}
+\end{Shaded}
+
+The following is a verbal formula for a covariance: deviations of x from
+its mean times deviations of y from its mean divided by n-1
+(i.e.~roughly the average of the product of the deviations)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{((X[,}\DecValTok{2}\NormalTok{]-}\KeywordTok{mean}\NormalTok{(X[,}\DecValTok{2}\NormalTok{]))*(y-}\KeywordTok{mean}\NormalTok{(y)))}
+\KeywordTok{sum}\NormalTok{((X[,}\DecValTok{2}\NormalTok{]-}\KeywordTok{mean}\NormalTok{(X[,}\DecValTok{2}\NormalTok{]))*(y-}\KeywordTok{mean}\NormalTok{(y)))/(}\DecValTok{8-1}\NormalTok{)}
+
+\CommentTok{# Same as above because we've removed the means from X.md and y.md}
+\KeywordTok{sum}\NormalTok{((X.md[,}\DecValTok{2}\NormalTok{])*(y.md))/(}\DecValTok{8-1}\NormalTok{)}
+
+\NormalTok{Xty<-}\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{y}
+\NormalTok{Xty}
+\NormalTok{Xty/(}\DecValTok{8-1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{3}
+\tightlist
+\item
+  And finally division: Try each of the following lines of math in R and
+  explain to yourself (or your colleagues) what happened (ideally relate
+  what happened to ideas about variances, covariances, sums, etc..)
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X/}\DecValTok{2}  \CommentTok{# divides each element in X by 2}
+
+\DecValTok{1}\NormalTok{/X  }\CommentTok{# the inverse of each element in X (notice the Infinities for the 0s in z)}
+
+\NormalTok{X^(-}\DecValTok{1}\NormalTok{)  }\CommentTok{# Same as above: 1/X==(X^(-1))}
+
+\DecValTok{1}\NormalTok{/X==(X^(-}\DecValTok{1}\NormalTok{))}
+
+\CommentTok{# Now matrix inversion using solve()}
+\KeywordTok{try}\NormalTok{(}\KeywordTok{solve}\NormalTok{(X))  }\CommentTok{# Doesn't work --- requires a square matrix}
+
+\KeywordTok{solve}\NormalTok{(XtX)  }\CommentTok{# This works, XtX is square.}
+
+\KeywordTok{dim}\NormalTok{(XtX)}
+\KeywordTok{dim}\NormalTok{(Xty)}
+
+\KeywordTok{solve}\NormalTok{(XtX)%*%Xty  }\CommentTok{# Least squares!}
+
+\KeywordTok{try}\NormalTok{(}\KeywordTok{solve}\NormalTok{(XtX.md))  }\CommentTok{# Problem with the zeros from the intercept with mean-deviated variables.}
+\NormalTok{XtX.md<-}\KeywordTok{t}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{:}\DecValTok{3}\NormalTok{])%*%X.md[,}\DecValTok{2}\NormalTok{:}\DecValTok{3}\NormalTok{]  }\CommentTok{# So, exclude the intercept (only use columns 2 and 3)}
+\KeywordTok{try}\NormalTok{(}\KeywordTok{solve}\NormalTok{(XtX.md))}
+
+\NormalTok{Xty.md<-}\KeywordTok{t}\NormalTok{(X.md[,}\DecValTok{2}\NormalTok{:}\DecValTok{3}\NormalTok{]) %*%}\StringTok{ }\NormalTok{y.md}
+
+\KeywordTok{solve}\NormalTok{(XtX.md) %*%}\StringTok{ }\NormalTok{Xty.md}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+  \CommentTok{# Notice that this is not the same as}
+\NormalTok{(}\DecValTok{1}\NormalTok{/XtX) %*%}\StringTok{ }\NormalTok{Xty  }\CommentTok{# Matrix inversion is different from scalar division}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       [,1]
+[1,] 76.147
+[2,]  2.005
+[3,]  2.333
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# But it is the same as the regressions with mean deviated variables}
+\KeywordTok{lm}\NormalTok{(}\KeywordTok{I}\NormalTok{(rpre-}\KeywordTok{mean}\NormalTok{(rpre))~}\KeywordTok{I}\NormalTok{(medhhi1000-}\KeywordTok{mean}\NormalTok{(medhhi1000))+}\KeywordTok{I}\NormalTok{(medage-}\KeywordTok{mean}\NormalTok{(medage))-}\DecValTok{1}\NormalTok{,}\DataTypeTok{data=}\NormalTok{news.df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = I(rpre - mean(rpre)) ~ I(medhhi1000 - mean(medhhi1000)) + 
+    I(medage - mean(medage)) - 1, data = news.df)
+
+Coefficients:
+I(medhhi1000 - mean(medhhi1000))          I(medage - mean(medage))  
+                           0.192                            -0.395  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# orpre}
+\KeywordTok{lm}\NormalTok{(}\KeywordTok{scale}\NormalTok{(rpre,}\DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)~}\KeywordTok{scale}\NormalTok{(medhhi1000,}\DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)+}\KeywordTok{scale}\NormalTok{(medage,}\DataTypeTok{scale=}\OtherTok{FALSE}\NormalTok{)-}\DecValTok{1}\NormalTok{,}\DataTypeTok{data=}\NormalTok{news.df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = scale(rpre, scale = FALSE) ~ scale(medhhi1000, scale = FALSE) + 
+    scale(medage, scale = FALSE) - 1, data = news.df)
+
+Coefficients:
+scale(medhhi1000, scale = FALSE)      scale(medage, scale = FALSE)  
+                           0.192                            -0.395  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# or}
+\KeywordTok{lm}\NormalTok{(y.md~X.md[,}\DecValTok{2}\NormalTok{]+X.md[,}\DecValTok{3}\NormalTok{]-}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+
+Call:
+lm(formula = y.md ~ X.md[, 2] + X.md[, 3] - 1)
+
+Coefficients:
+X.md[, 2]  X.md[, 3]  
+    0.192     -0.395  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# And the slopes are the same as the regression with an intercept (and variables on their original scales)}
+\KeywordTok{coef}\NormalTok{(}\KeywordTok{lm}\NormalTok{(rpre~medhhi1000+medage,}\DataTypeTok{data=}\NormalTok{news.df))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+(Intercept)  medhhi1000      medage 
+    30.9737      0.1922     -0.3950 
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{5}
+\tightlist
+\item
+  So, the vector of least squares coefficients is the result of dividing
+  what kind of matrix by what kind of matrix? (what kind of information
+  by what kind of information)? \emph{Hint:} This perspective of
+  ``accounting for covariation'' is another valid way to think about
+  what least squares is doing {[}in addition to smoothing conditional
+  means{]}. They are mathematically equivalent.
+\end{enumerate}
+
+Why should covariances divided by variances amount to differences of
+means, let alone adjusted differences of means?
+
+Here are some definitions of covariance and variance:
+
+\[\cov(X,Y)=\frac{\sum_{i}^{n}(X_i - \bar{X})(Y_i - \bar{Y})}{n-1} \]
+\[\var(X)=\cov(X,X)=\frac{\sum_{i}^{n}(X_i - \bar{X})(X_i - \bar{X})}{n-1}=\frac{\sum_{i}^{n}(X_i - \bar{X})^2}{n-1}
+\]
+
+So, first,
+
+\[\frac{\cov(X,Y)}{\var(X)}=\frac{\sum_{i}^{n}(X_i -
+  \bar{X})(Y_i - \bar{Y})}{\sum_{i}^{n}(X_i - \bar{X})^2}\]
+
+because the (n-1) cancels out. (Thus, we had to divide \(X^{T}X\) and
+\(X^{T}y\) by n-1 in the sections above to get the analogous
+covariances/variances). So, this is the bivariate case with
+\(y=\beta_0+\beta_1 x_1\). What about
+\(y=\beta_0+\beta_1 x_1+ \beta_2 x_2\)?
+
+This becomes notationally messy fast. Already, however, you can get a
+sense for the idea of deviations from the mean being a key ingredient in
+these calculations.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{6}
+\tightlist
+\item
+  Why might \(\bm{X} \bm{\beta}\) be useful? Let's get back to the
+  question of prediction. So far we have the a model that predicts
+  future turnout with the following squared error:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X<-}\KeywordTok{as.matrix}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{constant=}\DecValTok{1}\NormalTok{,news.df[,}\KeywordTok{c}\NormalTok{(}\StringTok{"medhhi1000"}\NormalTok{,}\StringTok{"medage"}\NormalTok{,}\StringTok{"blkpct"}\NormalTok{,}\StringTok{"cands"}\NormalTok{)]))}
+\NormalTok{y<-news.df$rpre}
+\NormalTok{bVector<-}\KeywordTok{solve}\NormalTok{(}\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{X) %*%}\StringTok{ }\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{y}
+\NormalTok{yhat<-}\StringTok{ }\NormalTok{X %*%}\StringTok{ }\NormalTok{bVector}
+\NormalTok{errors<-news.df$r-yhat}
+\KeywordTok{summary}\NormalTok{(errors)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+       V1        
+ Min.   :-20.06  
+ 1st Qu.: -7.58  
+ Median : -1.06  
+ Mean   :  3.12  
+ 3rd Qu.:  8.54  
+ Max.   : 37.09  
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mseOLS<-}\KeywordTok{mean}\NormalTok{(errors^}\DecValTok{2}\NormalTok{) ## mean squared errors, MSE}
+\end{Highlighting}
+\end{Shaded}
+
+Now, we suspect that we could do better than this from our reading in
+James et al. (2013). Here is an example using the lasso. What do you
+think? Did we do a better job than OLS in this small dataset? What is
+going on in this code?
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lassoCriterion<-function(lambda,b,y,X)\{}
+  \NormalTok{## Assumes that the first column of X is all 1s}
+  \NormalTok{yhat<-X %*%}\StringTok{ }\NormalTok{b}
+  \NormalTok{ehat<-y-yhat}
+  \NormalTok{l1.penalty<-}\KeywordTok{sum}\NormalTok{(}\KeywordTok{abs}\NormalTok{(b[-}\DecValTok{1}\NormalTok{])) ## no penalty on intercept}
+  \NormalTok{thessr<-}\KeywordTok{sum}\NormalTok{(ehat^}\DecValTok{2}\NormalTok{)}
+  \NormalTok{lassocrit<-thessr+lambda*l1.penalty}
+  \KeywordTok{return}\NormalTok{(lassocrit)}
+\NormalTok{\}}
+
+\KeywordTok{lassoCriterion}\NormalTok{(}\DataTypeTok{lambda=}\NormalTok{.}\DecValTok{5}\NormalTok{,}\DataTypeTok{b=}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{X=}\NormalTok{X)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] 6329
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## Best fit for lambda=.5}
+\NormalTok{lassoSol<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par=}\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{,}\DecValTok{0}\NormalTok{),}
+             \DataTypeTok{fn=}\NormalTok{lassoCriterion,}
+             \DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}
+             \DataTypeTok{X=}\NormalTok{X,}
+             \DataTypeTok{y=}\NormalTok{y,}
+         \DataTypeTok{lambda=}\NormalTok{.}\DecValTok{5}\NormalTok{,}
+             \DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 6329.000000 
+iter   2 value 2427.837751
+iter   3 value 2299.928566
+iter   4 value 1997.942064
+iter   5 value 1990.580450
+iter   6 value 1084.900229
+iter   7 value 909.338480
+iter   8 value 889.537671
+iter   9 value 873.869383
+iter  10 value 873.686183
+iter  11 value 873.682497
+iter  11 value 873.682495
+iter  11 value 873.682495
+final  value 873.682495 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{yhatL1<-X %*%}\StringTok{ }\NormalTok{lassoSol$par}
+\NormalTok{errorsL1<-news.df$r-yhatL1}
+\NormalTok{mseL1<-}\KeywordTok{mean}\NormalTok{(errorsL1^}\DecValTok{2}\NormalTok{)}
+
+\NormalTok{## Now see if we can find the best value of lambda}
+\NormalTok{nlambdas<-}\DecValTok{100}
+\NormalTok{##results<-matrix(NA,nrow=nlambdas,ncol=nrow(X)+1+1)}
+\NormalTok{somelambdas<-}\KeywordTok{seq}\NormalTok{(.}\DecValTok{001}\NormalTok{,}\DecValTok{100}\NormalTok{,}\DataTypeTok{length=}\NormalTok{nlambdas)}
+
+\NormalTok{## A function to get lasso criterion coefs and MSE}
+
+\NormalTok{getlassoMSE<-function(lambda,X,y)\{}
+  \NormalTok{lassoSol<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{par=}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}
+          \DataTypeTok{fn=}\NormalTok{lassoCriterion,}
+          \DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}
+          \DataTypeTok{X=}\NormalTok{X,}
+          \DataTypeTok{y=}\NormalTok{y,}
+          \DataTypeTok{lambda=}\NormalTok{lambda)}
+          \CommentTok{#,control=list(trace=1,REPORT=1))}
+
+  \NormalTok{yhatL1<-X %*%}\StringTok{ }\NormalTok{lassoSol$par}
+  \NormalTok{errorsL1<-news.df$r-yhatL1}
+  \NormalTok{mseL1<-}\KeywordTok{mean}\NormalTok{(errorsL1^}\DecValTok{2}\NormalTok{)}
+  \KeywordTok{return}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\DataTypeTok{par=}\NormalTok{lassoSol$par,}\DataTypeTok{mse=}\NormalTok{mseL1,}\DataTypeTok{lambda=}\NormalTok{lambda))}
+\NormalTok{\}}
+
+\NormalTok{results<-}\KeywordTok{sapply}\NormalTok{(somelambdas,function(l)\{ }\KeywordTok{getlassoMSE}\NormalTok{(l,}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y) \})}
+\NormalTok{## apply(results,1,summary)}
+\KeywordTok{min}\NormalTok{(results[}\StringTok{"mse"}\NormalTok{,])>mseOLS}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+[1] TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{results[}\StringTok{"lambda"}\NormalTok{,results[}\StringTok{"mse"}\NormalTok{,]==}\KeywordTok{min}\NormalTok{(results[}\StringTok{"mse"}\NormalTok{,])]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+lambda 
+ 0.001 
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## To do this even faster:}
+\KeywordTok{library}\NormalTok{(glmnet)}
+\NormalTok{lassoFits<-}\KeywordTok{glmnet}\NormalTok{(}\DataTypeTok{x=}\NormalTok{X[,-}\DecValTok{1}\NormalTok{],}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{) ## using an elastic net fit rather than strict lasso}
+\KeywordTok{par}\NormalTok{(}\DataTypeTok{mar=}\KeywordTok{c}\NormalTok{(}\DecValTok{6}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{1}\NormalTok{),}\DataTypeTok{mgp=}\KeywordTok{c}\NormalTok{(}\FloatTok{1.5}\NormalTok{,.}\DecValTok{5}\NormalTok{,}\DecValTok{0}\NormalTok{))}
+\KeywordTok{plot}\NormalTok{(lassoFits,}\DataTypeTok{xvar=}\StringTok{"lambda"}\NormalTok{,}\DataTypeTok{label=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{## This next line add the raw lambdas since the default plot shows only the log transformed lambdas}
+\KeywordTok{axis}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DataTypeTok{line=}\DecValTok{2}\NormalTok{,}\DataTypeTok{at=}\KeywordTok{log}\NormalTok{(lassoFits$lambda),}\DataTypeTok{labels=}\KeywordTok{round}\NormalTok{(lassoFits$lambda,}\DecValTok{3}\NormalTok{))}
+\KeywordTok{abline}\NormalTok{(}\DataTypeTok{h=}\DecValTok{0}\NormalTok{,}\DataTypeTok{col=}\StringTok{"gray"}\NormalTok{,}\DataTypeTok{lwd=}\NormalTok{.}\DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{getMSEs<-function(B,X,obsy)\{}
+  \NormalTok{yhats <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(B,}\DecValTok{2}\NormalTok{,function(b)\{ X %*%}\StringTok{ }\NormalTok{b \})}
+  \NormalTok{ehats <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(yhats,}\DecValTok{2}\NormalTok{,function(y)\{ obsy -}\StringTok{ }\NormalTok{y \})}
+  \KeywordTok{apply}\NormalTok{(ehats,}\DecValTok{2}\NormalTok{,function(e)\{ }\KeywordTok{mean}\NormalTok{(e^}\DecValTok{2}\NormalTok{) \})}
+\NormalTok{\}}
+
+\KeywordTok{getMSEs}\NormalTok{(}\DataTypeTok{B=}\KeywordTok{coef}\NormalTok{(lassoFits),}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{obsy=}\NormalTok{y)}
+\end{Highlighting}
+\end{Shaded}
+
+Hmmm\ldots{}. should the MSE always just go down? I wonder what James et
+al. (2013) has to say about this.\footnote{I suspect that James et al.
+  (2013) would recommend cross-validation --- but we only have 8
+  observations here, so that would be difficult.}
+
+Now, more benefits of penalized models. Imagine this model:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{newmodel<-rpre ~}\StringTok{ }\NormalTok{blkpct*medhhi1000*medage*cands}
+\NormalTok{lm4<-}\KeywordTok{lm}\NormalTok{(newmodel,news.df)}
+\NormalTok{X<-}\KeywordTok{model.matrix}\NormalTok{(newmodel,}\DataTypeTok{data=}\NormalTok{news.df)}
+
+\KeywordTok{try}\NormalTok{(b<-}\KeywordTok{solve}\NormalTok{(}\KeywordTok{t}\NormalTok{(X) %*%}\StringTok{ }\NormalTok{X) %*%}\StringTok{ }\NormalTok{X %*%}\StringTok{ }\NormalTok{y)}
+
+\NormalTok{lsCriterion2<-function(b,y,X)\{}
+  \NormalTok{yhat<-X %*%}\StringTok{ }\NormalTok{b}
+  \NormalTok{ehat<-y-yhat}
+  \NormalTok{thessr<-}\KeywordTok{sum}\NormalTok{(ehat^}\DecValTok{2}\NormalTok{)}
+  \KeywordTok{return}\NormalTok{(thessr)}
+\NormalTok{\}}
+
+\NormalTok{lsSolution1<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{fn=}\NormalTok{lsCriterion2,}\DataTypeTok{par=}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}\DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{,}\DataTypeTok{maxit=}\DecValTok{5000}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 6329.000000 
+iter   2 value 5656.480212
+iter   3 value 4047.012198
+iter   4 value 3482.751538
+iter   5 value 3452.997505
+iter   6 value 2939.600824
+iter   7 value 2852.644316
+iter   8 value 2359.121263
+iter   9 value 2354.120891
+iter  10 value 13.540365
+iter  11 value 0.000007
+iter  12 value 0.000000
+iter  13 value 0.000000
+iter  13 value 0.000000
+iter  13 value 0.000000
+final  value 0.000000 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lsSolution1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$par
+ [1]  0.015053  0.051740  0.185690  0.190425  0.058299  0.718082  0.580475  0.028731  0.127707  0.213224  0.228549 -0.059538
+[13] -0.213189  0.071521 -0.008270  0.004771
+
+$value
+[1] 5.426e-18
+
+$counts
+function gradient 
+     104       13 
+
+$convergence
+[1] 0
+
+$message
+NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lsSolution2<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{fn=}\NormalTok{lsCriterion2,}\DataTypeTok{par=}\KeywordTok{rep}\NormalTok{(}\DecValTok{100}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}\DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{,}\DataTypeTok{maxit=}\DecValTok{5000}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 7441391090677444.000000 
+iter   2 value 1356076409941235.500000
+iter   3 value 1350491960224328.000000
+iter   4 value 1349666718569429.500000
+iter   5 value 1349665271356833.250000
+iter   6 value 1349551090723999.000000
+iter   7 value 1347760180862289.750000
+iter   8 value 1131556848321706.250000
+iter   9 value 149897448372970.750000
+iter  10 value 147564160960367.593750
+iter  11 value 9411889700922.917969
+iter  12 value 162233.132360
+iter  13 value 0.082982
+iter  14 value 0.000000
+iter  15 value 0.000000
+iter  16 value 0.000000
+iter  17 value 0.000000
+iter  17 value 0.000000
+iter  17 value 0.000000
+final  value 0.000000 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lsSolution2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$par
+ [1]  2501.091  2662.019  2693.273  1578.838  -319.924  -551.454  -221.663  -100.712 -1061.509 -1043.176     4.614    16.384
+[13]   313.841   -52.662    27.193    -6.422
+
+$value
+[1] 6.99e-15
+
+$counts
+function gradient 
+     145       17 
+
+$convergence
+[1] 0
+
+$message
+NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lsSolution3<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{fn=}\NormalTok{lsCriterion2,}\DataTypeTok{par=}\KeywordTok{rep}\NormalTok{(-}\DecValTok{100}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}\DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{,}\DataTypeTok{maxit=}\DecValTok{5000}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 7441401704329883.000000 
+iter   2 value 1356079027123320.500000
+iter   3 value 1350494194517561.250000
+iter   4 value 1349668866831628.750000
+iter   5 value 1349667419301707.000000
+iter   6 value 1349553308310410.500000
+iter   7 value 1347768090571115.500000
+iter   8 value 1132598803304008.250000
+iter   9 value 150606021046742.625000
+iter  10 value 148263839837378.593750
+iter  11 value 10907826566701.357422
+iter  12 value 111708.219110
+iter  13 value 0.045310
+iter  14 value 0.000000
+iter  15 value 0.000000
+iter  15 value 0.000000
+final  value 0.000000 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lsSolution3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$par
+ [1] -1427.455 -3072.428  3574.534  2109.512 -2949.417 -1131.721   605.658  -124.494   637.673 -1047.221   -66.649    14.362
+[13]   360.732  -170.080    29.066    -5.742
+
+$value
+[1] 2.688e-15
+
+$counts
+function gradient 
+     109       15 
+
+$convergence
+[1] 0
+
+$message
+NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cbind}\NormalTok{(lsSolution1$par,lsSolution2$par,lsSolution3$par)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+           [,1]      [,2]      [,3]
+ [1,]  0.015053  2501.091 -1427.455
+ [2,]  0.051740  2662.019 -3072.428
+ [3,]  0.185690  2693.273  3574.534
+ [4,]  0.190425  1578.838  2109.512
+ [5,]  0.058299  -319.924 -2949.417
+ [6,]  0.718082  -551.454 -1131.721
+ [7,]  0.580475  -221.663   605.658
+ [8,]  0.028731  -100.712  -124.494
+ [9,]  0.127707 -1061.509   637.673
+[10,]  0.213224 -1043.176 -1047.221
+[11,]  0.228549     4.614   -66.649
+[12,] -0.059538    16.384    14.362
+[13,] -0.213189   313.841   360.732
+[14,]  0.071521   -52.662  -170.080
+[15,] -0.008270    27.193    29.066
+[16,]  0.004771    -6.422    -5.742
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## Notice that we are not standardizing the columns of X here. Should do that for real use.}
+\NormalTok{ridgeCriterion<-function(lambda,b,y,X)\{}
+  \NormalTok{## Assumes that the first column of X is all 1s}
+  \NormalTok{yhat<-X %*%}\StringTok{ }\NormalTok{b}
+  \NormalTok{ehat<-y-yhat}
+  \NormalTok{l2.penalty<-}\KeywordTok{sum}\NormalTok{(b[-}\DecValTok{1}\NormalTok{]^}\DecValTok{2}\NormalTok{) ## no penalty on intercept}
+  \NormalTok{thessr<-}\KeywordTok{sum}\NormalTok{(ehat^}\DecValTok{2}\NormalTok{)}
+  \NormalTok{lassocrit<-thessr+lambda*l2.penalty}
+  \KeywordTok{return}\NormalTok{(lassocrit)}
+\NormalTok{\}}
+
+
+\NormalTok{ridgeSolution1<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{fn=}\NormalTok{ridgeCriterion,}\DataTypeTok{par=}\KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}\DataTypeTok{lambda=}\NormalTok{.}\DecValTok{5}\NormalTok{,}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}\DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{,}\DataTypeTok{maxit=}\DecValTok{5000}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 6329.000000 
+iter   2 value 5656.480212
+iter   3 value 4047.012202
+iter   4 value 3482.751544
+iter   5 value 3452.997565
+iter   6 value 2939.607925
+iter   7 value 2852.686174
+iter   8 value 2359.249616
+iter   9 value 2356.101926
+iter  10 value 14.092219
+iter  11 value 0.547131
+iter  12 value 0.546899
+iter  13 value 0.541653
+iter  14 value 0.532499
+iter  15 value 0.505338
+iter  16 value 0.445721
+iter  17 value 0.325127
+iter  18 value 0.161774
+iter  19 value 0.046056
+iter  20 value 0.014910
+iter  21 value 0.012250
+iter  22 value 0.012185
+iter  23 value 0.012185
+iter  24 value 0.012185
+iter  24 value 0.012185
+iter  24 value 0.012185
+final  value 0.012185 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ridgeSolution1}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$par
+ [1] 71.3736705 -0.0011064 -0.0039195  0.0085869 -0.0003061 -0.0261919  0.0058879 -0.0123911 -0.0054513 -0.0173382  0.0578158
+[12] -0.0215740 -0.1074402  0.0878351  0.0018812  0.0014181
+
+$value
+[1] 0.01218
+
+$counts
+function gradient 
+     120       24 
+
+$convergence
+[1] 0
+
+$message
+NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ridgeSolution2<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{fn=}\NormalTok{ridgeCriterion,}\DataTypeTok{par=}\KeywordTok{rep}\NormalTok{(}\DecValTok{100}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}\DataTypeTok{lambda=}\NormalTok{.}\DecValTok{5}\NormalTok{,}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}\DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{,}\DataTypeTok{maxit=}\DecValTok{5000}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 7441391090752444.000000 
+iter   2 value 1356076410010608.500000
+iter   3 value 1350491960306302.250000
+iter   4 value 1349666718642526.500000
+iter   5 value 1349665271458166.250000
+iter   6 value 1349551083440734.250000
+iter   7 value 1347760322768737.000000
+iter   8 value 1131560842811048.000000
+iter   9 value 149873538022417.062500
+iter  10 value 147544281813811.500000
+iter  11 value 9501783822758.935547
+iter  12 value 477787.957506
+iter  13 value 4.162805
+iter  14 value 2.457498
+iter  15 value 2.456468
+iter  16 value 1.907530
+iter  17 value 1.300097
+iter  18 value 0.458548
+iter  19 value 0.085397
+iter  20 value 0.015646
+iter  21 value 0.012237
+iter  22 value 0.012185
+iter  23 value 0.012185
+iter  24 value 0.012185
+iter  24 value 0.012185
+iter  24 value 0.012185
+final  value 0.012185 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ridgeSolution2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$par
+ [1] 71.3736713 -0.0011064 -0.0039195  0.0085869 -0.0003061 -0.0261919  0.0058879 -0.0123911 -0.0054513 -0.0173382  0.0578158
+[12] -0.0215740 -0.1074402  0.0878351  0.0018812  0.0014181
+
+$value
+[1] 0.01218
+
+$counts
+function gradient 
+     121       24 
+
+$convergence
+[1] 0
+
+$message
+NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ridgeSolution3<-}\KeywordTok{optim}\NormalTok{(}\DataTypeTok{fn=}\NormalTok{ridgeCriterion,}\DataTypeTok{par=}\KeywordTok{rep}\NormalTok{(-}\DecValTok{100}\NormalTok{,}\KeywordTok{ncol}\NormalTok{(X)),}\DataTypeTok{lambda=}\NormalTok{.}\DecValTok{5}\NormalTok{,}\DataTypeTok{X=}\NormalTok{X,}\DataTypeTok{y=}\NormalTok{y,}\DataTypeTok{method=}\StringTok{"BFGS"}\NormalTok{,}\DataTypeTok{control=}\KeywordTok{list}\NormalTok{(}\DataTypeTok{trace=}\DecValTok{1}\NormalTok{,}\DataTypeTok{REPORT=}\DecValTok{1}\NormalTok{,}\DataTypeTok{maxit=}\DecValTok{5000}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+initial  value 7441401704404883.000000 
+iter   2 value 1356079027192693.500000
+iter   3 value 1350494194599539.250000
+iter   4 value 1349668866903427.500000
+iter   5 value 1349667419377215.250000
+iter   6 value 1349553307118946.750000
+iter   7 value 1347768841400444.500000
+iter   8 value 1132690100101400.500000
+iter   9 value 150654430316838.593750
+iter  10 value 148316452125697.093750
+iter  11 value 11912015510059.597656
+iter  12 value 163774.834192
+iter  13 value 1677.541867
+iter  14 value 1676.600446
+iter  15 value 1674.320896
+iter  16 value 1668.179649
+iter  17 value 1652.425259
+iter  18 value 1611.876365
+iter  19 value 1511.681234
+iter  20 value 1284.041044
+iter  21 value 863.035858
+iter  22 value 356.103886
+iter  23 value 64.603326
+iter  24 value 3.947251
+iter  25 value 0.081469
+iter  26 value 0.012512
+iter  27 value 0.012185
+iter  28 value 0.012185
+iter  28 value 0.012185
+iter  28 value 0.012185
+final  value 0.012185 
+converged
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ridgeSolution3}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+$par
+ [1] 71.3736614 -0.0011064 -0.0039194  0.0085869 -0.0003061 -0.0261918  0.0058880 -0.0123911 -0.0054513 -0.0173381  0.0578158
+[12] -0.0215740 -0.1074402  0.0878351  0.0018812  0.0014181
+
+$value
+[1] 0.01218
+
+$counts
+function gradient 
+     126       28 
+
+$convergence
+[1] 0
+
+$message
+NULL
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{cbind}\NormalTok{(ridgeSolution1$par,ridgeSolution2$par,ridgeSolution3$par)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+            [,1]       [,2]       [,3]
+ [1,] 71.3736705 71.3736713 71.3736614
+ [2,] -0.0011064 -0.0011064 -0.0011064
+ [3,] -0.0039195 -0.0039195 -0.0039194
+ [4,]  0.0085869  0.0085869  0.0085869
+ [5,] -0.0003061 -0.0003061 -0.0003061
+ [6,] -0.0261919 -0.0261919 -0.0261918
+ [7,]  0.0058879  0.0058879  0.0058880
+ [8,] -0.0123911 -0.0123911 -0.0123911
+ [9,] -0.0054513 -0.0054513 -0.0054513
+[10,] -0.0173382 -0.0173382 -0.0173381
+[11,]  0.0578158  0.0578158  0.0578158
+[12,] -0.0215740 -0.0215740 -0.0215740
+[13,] -0.1074402 -0.1074402 -0.1074402
+[14,]  0.0878351  0.0878351  0.0878351
+[15,]  0.0018812  0.0018812  0.0018812
+[16,]  0.0014181  0.0014181  0.0014181
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{## A sketch of Cross-validation to choose lambda: here using 3-fold because of the small dataset}
+\NormalTok{cvfn<-function()\{}
+  \NormalTok{testids<-}\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{nrow}\NormalTok{(X),}\KeywordTok{nrow}\NormalTok{(X)/}\DecValTok{3}\NormalTok{)}
+  \NormalTok{trainingids <-}\StringTok{ }\NormalTok{(}\DecValTok{1}\NormalTok{:}\KeywordTok{nrow}\NormalTok{(X))[-testids]}
+  \NormalTok{## Fit}
+  \NormalTok{## Predict yhat for testids}
+  \NormalTok{## MSE for y_test versus yhat_test}
+\NormalTok{\}}
+
+\NormalTok{## Average of the MSE across folds is CV MSE}
+\end{Highlighting}
+\end{Shaded}
+
+\section*{References}\label{references}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\hypertarget{ref-james2013introduction}{}
+James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani.
+2013. \emph{An Introduction to Statistical Learning}. Springer.
+
+\end{document}

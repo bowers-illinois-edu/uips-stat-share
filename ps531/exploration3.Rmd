@@ -1,33 +1,34 @@
 ---
 title: 'Exploration 3: Matrices make life easier.'
-author: 'Jake Bowers'
+author: "Jake Bowers"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
-bibliography: classbib.bib
-fontsize: 10pt
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 4
+    keep_tex: yes
+    latex_engine: xelatex
+  html_document:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 4
 geometry: margin=1in
-mainfont: "Crimson Text"
 graphics: yes
 header-includes:
-  - \usepackage[T1]{fontenc}
-  - \usepackage{textcomp}
-  - \usepackage{fontspec}
-  - \newfontfamily\unicodefont[Ligatures=TeX]{TeX Gyre Heros}
-  - \newfontfamily\themainfont[Ligatures=TeX]{Crimson Text}
-  - \newfontfamily\grouptwofont[Ligatures=TeX]{Source Code Pro}
-  - \newfontfamily\groupthreefont[Ligatures=TeX]{Courier}
-output:
-    html_document:
-      fig_caption: yes
-      fig_height: 4
-      fig_width: 4
-    pdf_document:
-      fig_caption: yes
-      fig_height: 4
-      fig_width: 4
-      latex_engine: xelatex
-      keep_tex: true
+- \usepackage[T1]{fontenc}
+- \usepackage{textcomp}
+- \usepackage{fontspec}
+- \usepackage{bm}
+- \newfontfamily\unicodefont[Ligatures=TeX]{Courier}
+- \newfontfamily\themainfont[Ligatures=TeX]{Courier}
+- \newfontfamily\grouptwofont[Ligatures=TeX]{Courier}
+- \newfontfamily\groupthreefont[Ligatures=TeX]{Courier}
+- \DeclareTextCommandDefault{\nobreakspace}{\leavevmode\nobreak\ } 
+mainfont: Courier
+fontsize: 10pt
+bibliography: classbib.bib
 ---
-
 
 <!-- Make this document using library(rmarkdown); render("exploration1.Rmd") -->
 \input{mytexsymbols}
@@ -143,18 +144,18 @@ summary(ehat)
 "Now, I'm very impressed at the speed and conciseness of this! I mean, he got the same vector of coefficients in like 1/1000 the time that it took me to search for a solution --- even using a fast optimizer. Also, he got the predictions very quickly too! But I'm confused about how this works. I understand the idea of proposing different values for the different coefficients and then asking how well they do --- in a sum of squared error sense. But the three lines that create `bVector` and `yhat` and even `ehat` are a mystery and I worry that they are not actually comparing my predictions of past turnout to observed future turnout (`rpre` versus ` r`). Maybe you can help? I asked the analyst to provide a little guidance to help you get practice with these ideas."
 
 
-So, you need to be able to explain what is happening when we tell R to do least squares with the matrix $\bX$ and
-vector $\by$ via $(\bX^{T}\bX)^{-1}\bX^{T}\by$ using the command
+So, you need to be able to explain what is happening when we tell R to do least squares with the matrix $\bm{X}$ and
+vector $\bm{Y}$ via $(\bm{X}^{T}\bm{X})^{-1}\bm{X}^{T}\bm{Y}$ using the command
 `solve(t(X)%*%X)%*%(t(X)%*%y)`. Where
-`t(X)`$\equiv \bX^{T}$ (meaning the transpose of $\bX$) and
-`solve(X)`$\equiv \bX^{-1}$ (meaning the inverse of $\bX$).
+`t(X)`$\equiv \bm{X}^{T}$ (meaning the transpose of $\bm{X}$) and
+`solve(X)`$\equiv \bm{X}^{-1}$ (meaning the inverse of $\bm{X}$).
 
 Here are some steps you might take to produce this explanation.
 
-1.  First, let's create a $\bX$ matrix using the newspapers data to
+1.  First, let's create a $\bm{X}$ matrix using the newspapers data to
   do a regression of the form `baseline.turnoutx~income+median age` (where
   baseline.turnout is `rpre` and income is `medhhi1000` and median age of the city is `medage`). Here is
-  how one might do this in R for both $\bX$ and $\by$ (where,
+  how one might do this in R for both $\bm{X}$ and $\bm{Y}$ (where,
   \textbf{bold} represents matrices or vectors):
 
 ```{r setupXandy, results='hide'}
@@ -173,8 +174,8 @@ str(y)
 dim(X)
 dim(y)
 ```
-   - Explain how we created the $\bX$ matrix \emph{Hint:} The column of 1s has to do with the intercept or constant term.
-   - What do the columns of $\bX$ represent?
+   - Explain how we created the $\bm{X}$ matrix \emph{Hint:} The column of 1s has to do with the intercept or constant term.
+   - What do the columns of $\bm{X}$ represent?
    - What do the rows represent?
 
 2. First, addition and subtraction: Try each of the following lines of math in R and explain to yourself (or your colleagues) what happened, and what this means about matrix math. I did the first one as an example.
@@ -308,7 +309,7 @@ and clean compared to the previous! Don't we love matrix multiplication?
 X %*% b
 ```
 
-How does `fitted(thelm)` relate to `X %*% b`? What is ` %*% ` in  ` X %*% b ` (often written $\bX \bb$ or $\bX \hat{\bbeta}$)?
+How does `fitted(thelm)` relate to `X %*% b`? What is ` %*% ` in  ` X %*% b ` (often written $\bm{X} \bm{b}$ or $\bm{X} \hat{\bm{\beta}}$)?
 
 ```{r lmstuff}
 thelm<-lm(rpre~medhhi1000+medage,data=news.df)
@@ -317,7 +318,7 @@ fitted(thelm)
 
 
 4. How would you use matrix addition/subtraction to get the residuals once
-  you had $\bX \bb$ (aka `X %*% b`)?
+  you had $\bm{X} \bm{b}$ (aka `X %*% b`)?
 
 5. Now, let's meet another important matrix:
 
@@ -376,7 +377,7 @@ Here another representation of `XtX` that might help you explain and reproduce
 the entries above where $x_{1i}$ and $x_{2i}$ represent the two covariates in
 our prediction model.
 
-$$\bX^{T}\bX=\begin{bmatrix} n & \sum_{i = 1}^{n}{x_{1i}} & \sum_{i =
+$$\bm{X}^{T}\bm{X}=\begin{bmatrix} n & \sum_{i = 1}^{n}{x_{1i}} & \sum_{i =
     1}^{n}{x_{2i}} \cr \sum_{i = 1}^{n}{x_{1i}} & \sum_{i = 1}^{n}
   {{x_{1i}}}^2 & \sum_{i = 1}^{n}{x_{1i}}{x_{2i}} \\ \sum_{i =
     1}^{n}{x_{2i}} & \sum_{i = 1}^{n} {x_{1i}}{x_{2i}} & \sum_{i =
@@ -401,7 +402,7 @@ XtX.md/(8-1)  # The variance-covariance matrix of the x's
 
 ```
 
-What about $\bX^{T} \by$? Explain the entries in `Xty.md`
+What about $\bm{X}^{T} \bm{Y}$? Explain the entries in `Xty.md`
 
 ```{r Xty,results='hide',tidy.opts=list(keep.comment=FALSE)}
 t(X.md)  # Transpose of mean-deviated X
@@ -515,7 +516,7 @@ This becomes notationally messy fast.  Already,
 however, you can get a sense for the idea of deviations from the mean
 being a key ingredient in these calculations.
 
-7.  Why might $\bX \bbeta$ be useful? Let's get back to the question of prediction. So far we have the a model that predicts future turnout with the following squared error:
+7.  Why might $\bm{X} \bm{\beta}$ be useful? Let's get back to the question of prediction. So far we have the a model that predicts future turnout with the following squared error:
 
 ```{r}
 
@@ -677,7 +678,3 @@ cvfn<-function(){
 ```
 
 # References
-
-
-
-
