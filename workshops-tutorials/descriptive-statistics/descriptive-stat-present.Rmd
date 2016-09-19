@@ -255,18 +255,17 @@ Evaluating significance
 chisq.test(approvalByEthnicity)
 ```
 
-## 
+## Cross Tab (Three Variables)
 ```{r}
 # 3-Way Frequency Table
-mytable <- xtabs(~religion+ftGay+black, data=anes)
+mytable <- xtabs(~black+ftGay+religion, data=anes)
 dimnames(mytable) = list(
-  black=c("black", "not black"),
+  black=c("black", "non-black"),
   ftGay=c("approve", "not approve"),
   religion=c("high", "low"))
 margin.table(mytable, margin = c(1:3))
 prop.table(mytable, margin = 1)
 summary(mytable) # chi-square test of indepedence
 ```
-
 
 # Other Tests 

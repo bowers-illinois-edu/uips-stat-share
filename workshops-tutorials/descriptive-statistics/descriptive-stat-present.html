@@ -160,6 +160,12 @@ $(document).ready(function () {
 <li><a href="#disaggregating-attitudes-over-time"><span class="toc-section-number">4.2</span> Disaggregating Attitudes Over Time</a></li>
 <li><a href="#attitudes-by-ethnicity-blackblack"><span class="toc-section-number">4.3</span> Attitudes by Ethnicity (Black/~Black)</a></li>
 </ul></li>
+<li><a href="#control-through-cross-tabs"><span class="toc-section-number">5</span> Control Through Cross-Tabs</a><ul>
+<li><a href="#recode-feeling-thermometer"><span class="toc-section-number">5.1</span> Recode Feeling Thermometer</a></li>
+<li><a href="#cross-tab-two-variables"><span class="toc-section-number">5.2</span> Cross Tab (Two Variables)</a></li>
+<li><a href="#cross-tab-three-variables"><span class="toc-section-number">5.3</span> Cross Tab (Three Variables)</a></li>
+</ul></li>
+<li><a href="#other-tests"><span class="toc-section-number">6</span> Other Tests</a></li>
 </ul>
 </div>
 
@@ -295,6 +301,12 @@ anes$religion &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(a
 <span class="co"># Central Tendency (Separate Ethnic Groups) with(subset(anes, black==?),</span>
 <span class="co"># summary(ft))</span>
 
+<span class="co"># table(anes$VCF0105B) with(subset(anes, VCF0105B=='(1) 1. White</span>
+<span class="co"># non-Hispanic'), summary(ft)) with(subset(anes, VCF0105B=='(2) 2. Black</span>
+<span class="co"># non-Hispanic'), summary(ft)) with(subset(anes, VCF0105B=='(3) 3.</span>
+<span class="co"># Hispanic'), summary(ft)) with(subset(anes, VCF0105B=='(4) 4. Other or</span>
+<span class="co"># multiple races, non-Hispanic'), summary(ft))</span>
+
 
 <span class="co"># Boxplot for Black/~Black</span>
 <span class="kw">require</span>(ggplot2)
@@ -304,6 +316,85 @@ anes$religion &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(a
 <span class="co"># Histogram and/or density plot</span></code></pre></div>
 <p>How do attitudes towards gays and lesbians vary accross ethnic groups?</p>
 </div>
+</div>
+<div id="control-through-cross-tabs" class="section level1">
+<h1><span class="header-section-number">5</span> Control Through Cross-Tabs</h1>
+<p>How did time affect attitudes towards homosexuality? Does ethnicity also have a relationship? Does there seem to be a relationship between ethnicity and attitudes?</p>
+<p>Formulate a hypothesis and write it down here. We’ll test these by building some crosstables or crosstabs.</p>
+<div id="recode-feeling-thermometer" class="section level2">
+<h2><span class="header-section-number">5.1</span> Recode Feeling Thermometer</h2>
+<p>Let’s recode the ft variable so that it simply reflects if a person responds with approval or disapproval. We’ll set the cutoff at 50 for this distinction.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">anes$ftGay &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(anes$ft &gt;<span class="st"> </span><span class="dv">50</span>)
+<span class="kw">table</span>(anes$ftGay)</code></pre></div>
+<pre><code>
+   0    1 
+2799  918 </code></pre>
+<p>Why did we do this? Well, here’s one reason. Try this yourself – output not printed here.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">table</span>(anes$ft)</code></pre></div>
+</div>
+<div id="cross-tab-two-variables" class="section level2">
+<h2><span class="header-section-number">5.2</span> Cross Tab (Two Variables)</h2>
+<p>What’s in a crosstab?</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">approvalByEthnicity &lt;-<span class="st"> </span><span class="kw">table</span>(anes$black, anes$ftGay)
+<span class="kw">dimnames</span>(approvalByEthnicity) =<span class="st"> </span><span class="kw">list</span>(<span class="dt">black =</span> <span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;not black&quot;</span>), <span class="dt">ftGay =</span> <span class="kw">c</span>(<span class="st">&quot;approve&quot;</span>, 
+    <span class="st">&quot;not approve&quot;</span>))
+<span class="kw">prop.table</span>(approvalByEthnicity, <span class="dt">margin =</span> <span class="dv">1</span>)</code></pre></div>
+<pre><code>           ftGay
+black         approve not approve
+  black     0.7600927   0.2399073
+  not black 0.7181409   0.2818591</code></pre>
+<p>Evaluating significance</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">chisq.test</span>(approvalByEthnicity)</code></pre></div>
+<pre><code>
+    Pearson's Chi-squared test with Yates' continuity correction
+
+data:  approvalByEthnicity
+X-squared = 4.9406, df = 1, p-value = 0.02623</code></pre>
+</div>
+<div id="cross-tab-three-variables" class="section level2">
+<h2><span class="header-section-number">5.3</span> Cross Tab (Three Variables)</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># 3-Way Frequency Table</span>
+mytable &lt;-<span class="st"> </span><span class="kw">xtabs</span>(~black +<span class="st"> </span>ftGay +<span class="st"> </span>religion, <span class="dt">data =</span> anes)
+<span class="kw">dimnames</span>(mytable) =<span class="st"> </span><span class="kw">list</span>(<span class="dt">black =</span> <span class="kw">c</span>(<span class="st">&quot;black&quot;</span>, <span class="st">&quot;non-black&quot;</span>), <span class="dt">ftGay =</span> <span class="kw">c</span>(<span class="st">&quot;approve&quot;</span>, 
+    <span class="st">&quot;not approve&quot;</span>), <span class="dt">religion =</span> <span class="kw">c</span>(<span class="st">&quot;high&quot;</span>, <span class="st">&quot;low&quot;</span>))
+<span class="kw">margin.table</span>(mytable, <span class="dt">margin =</span> <span class="kw">c</span>(<span class="dv">1</span>:<span class="dv">3</span>))</code></pre></div>
+<pre><code>, , religion = high
+
+           ftGay
+black       approve not approve
+  black         545         422
+  non-black     101          68
+
+, , religion = low
+
+           ftGay
+black       approve not approve
+  black         417         146
+  non-black     219          91</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">prop.table</span>(mytable, <span class="dt">margin =</span> <span class="dv">1</span>)</code></pre></div>
+<pre><code>, , religion = high
+
+           ftGay
+black          approve not approve
+  black     0.35620915  0.27581699
+  non-black 0.21085595  0.14196242
+
+, , religion = low
+
+           ftGay
+black          approve not approve
+  black     0.27254902  0.09542484
+  non-black 0.45720251  0.18997912</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(mytable)  <span class="co"># chi-square test of indepedence</span></code></pre></div>
+<pre><code>Call: xtabs(formula = ~black + ftGay + religion, data = anes)
+Number of cases in table: 2009 
+Number of factors: 3 
+Test for independence of all factors:
+    Chisq = 173.53, df = 4, p-value = 1.829e-36</code></pre>
+</div>
+</div>
+<div id="other-tests" class="section level1">
+<h1><span class="header-section-number">6</span> Other Tests</h1>
 </div>
 
 
