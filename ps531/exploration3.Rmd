@@ -24,7 +24,7 @@ header-includes:
 - \newfontfamily\themainfont[Ligatures=TeX]{Courier}
 - \newfontfamily\grouptwofont[Ligatures=TeX]{Courier}
 - \newfontfamily\groupthreefont[Ligatures=TeX]{Courier}
-- \DeclareTextCommandDefault{\nobreakspace}{\leavevmode\nobreak\ } 
+- \DeclareTextCommandDefault{\nobreakspace}{\leavevmode\nobreak\ }
 mainfont: Courier
 fontsize: 10pt
 bibliography: classbib.bib

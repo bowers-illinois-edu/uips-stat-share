@@ -1,39 +1,47 @@
 ---
 title: "Descriptive Statistics"
 author: "Jason Renn"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
-  ioslides_presentation:
-    widescreen: yes
+  html_document:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 8
+    highlight: haddock
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r setup, include=FALSE}
 require(knitr)
 opts_chunk$set(
-  tidy=TRUE,     # display code as typed # Changed to true because my comments are too long
+  tidy=TRUE,
   tidy.opts=list(width.cutoff=75),
-  size="small",    # slightly smaller font for code
+  size="small",
   echo=TRUE,
   results='markup',
   strip.white=TRUE,
   fig.path='figs/fig',
-  cache=FALSE,
+  cache=TRUE,
   highlight=TRUE,
-  width.cutoff=132, 
-  size='footnotesize',
-  out.width='.9\\textwidth',
+  width.cutoff=75, 
   fig.retina=FALSE,
   message=FALSE,
   warning=FALSE,
   comment=NA)
 ```
 
-## The AMERICAN NATIONAL ELECTION STUDIES (ANES)
+# The AMERICAN NATIONAL ELECTION STUDIES (ANES)
 The [ANES](http://www.electionstudies.org/) is a survey that covers voting behavior, public opinion, and political participation. While the primary mission of the ANES is to answer questions about voting behavior, the wealth of variables contained in the survey mean that we can use these data to answer other questions too.  
 
 Today's question: __How have the attitudes of Americans changed towards gays and lesbians over time?__  
 
-## Description and Comparison Across Groups
+# Tasks: Description and Comparison Across Groups
 We will use some basic descriptive statistics in today's class. Remember that after generating a number or creating a figure, you must discuss and describe it. We will do the following:  
 
 - Using two American National Election Studies, from two different years, characterize the attitudes of all Americans toward gays and lesbians.  
@@ -43,26 +51,37 @@ We will use some basic descriptive statistics in today's class. Remember that af
 
 
 
-## The Data
+# The Data
 The ANES dataset contains hundred of variables. We are only interested in a few today. If you would like to know about the other variables contained inthe ANES, read the [codebook](http://www.electionstudies.org/studypages/anes_timeseries_cdf/anes_timeseries_cdf_codebook_var.pdf).  
 
 This version of the ANES includes multiple waves or years. We will look at two sets of years, 2004 and 2008.  
 
-## Variables of Interest
-- Feeling thermometer for attitude toward Gays and Lesbians (_VCF0232_)
-- Year of survey (_VCF0004_)
-- Race-ethnicity of the respondent (_VCF0105b_)
 
-```{r, echo = F}
-anes <- readRDS("C:/Users/duurenn2/Desktop/Dropbox/Graduate School/Fall 2016/uips-stat-share/workshops-tutorials/descriptive-statistics/anes-data.RData")
+```{r, echo = T}
+# There are many ways of importing data. Here is one.
+setwd("~/uips-stat-share/workshops-tutorials/descriptive-statistics")
+anes <- readRDS("anes-data.RData")
+
+# write.csv(anes, file = "anes.csv")
+# Here is another
+# anes <- read.csv("anes.csv")
 
 anes <- anes[(which(anes$VCF0004 %in% c(1988,2008))),]
+anes <- anes[,c("VCF0232", "VCF0004", "VCF0105B", "VCF0850")]
+names(anes)[names(anes)=="VCF0004"] <- "year"
 ```
 
-## Feeling Thermometer Question for Gays and Lesbians
-Some questions on the ANES are what we refer to as "feeling thermometer" questions. The answer to these questions produce a number from 0 to 100, with higher values corresponding to a "warmer" or more favorable view. Here is the wording used to explain the question to survey respondents.  
+## Variables of Interest
+- Feeling thermometer for attitude toward Gays and Lesbians (_ft_)
+- Year of survey (_year_)
+- Race-ethnicity of the respondent (_black_)
+- Religiosity (_religion_)
 
-_"I'd like to get your feelings toward some of our political leaders and other people who are in the
+
+## Feeling Thermometer Question for Gays and Lesbians
+Some questions on the ANES are what we refer to as "feeling thermometer" questions. The answer to these questions produce a number from 0 to 100, with higher values corresponding to a "warmer" or more favorable view. 
+
+Question: _"I'd like to get your feelings toward some of our political leaders and other people who are in the
 news these days. I'll read the name of a person and I'd like you to rate that person using 
 something we call the feeling thermometer. Ratings between 50 degrees and 100 degrees
 mean that you feel favorable and warm toward the person. Ratings between 0 degrees and 50
@@ -71,81 +90,183 @@ much for that person. You would rate the person at the 50 degree mark if you don
 warm or cold toward the person. If we come to a person whose name you don't 
 recognize, you don't need to rate that person. Just tell me and we'll move on to the next one."_
 
-## Ethnicity-Race
-- 4 categories
-```{r}
-# drop non-black
+```{r, warning=F, message=F}
+names(anes)[names(anes)=="VCF0232"] <- "ft"
 ```
 
+
+## Ethnicity-Race
+Question: What racial or ethnic group or groups best describes you?  
+
+Responses:  
+1. White non-Hispanic  
+2. Black non-Hispanic  
+3. Hispanic  
+4. Other or multiple races, non-Hispanic  
+ 
+```{r}
+# We will recode so that this variable just indicates if the respondent is black
+anes$black <- as.numeric(anes$VCF0105B == "(2) 2. Black non-Hispanic")
+
+# Check
+# table(anes$VCF0105B, exclude = NULL)
+# table(anes$VCF0105B, anes$black, exclude = NULL)
+```
 
 ## Religiosity 
-Question:  
+Question: Which of these statements comes closest to describing your feelings about the Bible? You can just give me the number of your choice.  
+
 Responses:  
+1. The Bible is the actual Word of God and is to be taken literally, word for word  
+2. The Bible is the Word of God but not everything in it should be taken literally, word for word  
+3. The Bible is a book written by men and is not the Word of God  
 
 ```{r}
+# We will recode so that this variable just indicates the highest level of religiosity
+# Yes, this is Christianity-centric. You may want to look in the anes codebook and find another variable
+anes$religion <- as.numeric(anes$VCF0850 == "(1) 1. The Bible is the actual Word of God and is to be")
 
+# Check
+# levels(anes$VCF0850)
+# table(anes$VCF0850, anes$religion, exclude = NULL)
 ```
 
 
-## Description: Attitudes over Time
+# Description
+__Using two American National Election Studies, from two different years, characterize the attitudes of all Americans toward gays and lesbians.__
+
+How would you "characterize the attitues of all Americans?" We will begin with some measures of central tendency.  
+
+## FT Attitudes towards Gays and Lesbians
+Recall that the FT scores range from 0 to 100, with high values indicating "warmer" or more approving attitudes. How do the respondents in the ANES view gays and lesbians? I will produce some numbers in the code below. Your job is to discuss the data and explain in substantive terms how it describes the attitudes of Americans towards gays and lesbians.  
+
+
 ```{r}
-# All Years
-with(anes, summary(VCF0232))
-with(anes, boxplot(VCF0232))
-with(anes, hist(VCF0232))
+# The Average of ft
+mean(anes$ft, na.rm=T)
 
-# Separate Years
-with(subset(anes, VCF0004==1988), summary(VCF0232))
-with(subset(anes, VCF0004==2008), summary(VCF0232))
+# The Median
+quantile(anes$ft, .5, na.rm=T)
 
+# Alternatively, you could use summary 
+# summary(anes$ft)
+```
+
+We can visualize the distribution of attitudes towards gays and lesbians using a boxplot or a histogram. What does the distribution of attitudes tell you?   
+```{r}
+with(anes, boxplot(ft, horizontal = T, main="Boxplot 1: Feeling Thermometer for \nGays/Lesbians (1988 and 2008)"))
+with(anes, hist(ft, main = "Histogram 1: Feeling Thermometer for \nGays/Lesbians (1988 and 2008)"))
+```
+
+## Disaggregating Attitudes Over Time
+What is the point of looking at attitudes in two time periods? What do you expect to see when we do this? What do the descriptive statistics tell you?  
+
+```{r}
+# Start with the same summary statistics
+with(subset(anes, year==1988), summary(ft))
+with(subset(anes, year==2008), summary(ft))
+```
+
+Let's use the same visual representations used above to depict the differences between attitudes in 1988 and 2008. What differences between the top and bottom boxplot would you highlight when talking about changes in attitudes towards gays and lesbians?  
+
+```{r}
 # Boxplot
+# install.packages(ggplot2)
 require(ggplot2)
-ggplot(anes, aes(as.factor(VCF0004), VCF0232)) +
+ggplot(anes, aes(as.factor(year), ft)) +
   geom_boxplot() + 
+  coord_flip() +
   ylab("Gay/Lesbian Feeling Thermometer") + 
   xlab("Year")
+```
 
+Here's one more way to look at the differences across our two survey periods. What strikes you about these figures? What do the red, blue, and purple regions represent?  
+
+```{r}
 # Hist
-ggplot(anes, aes(color=as.factor(VCF0004), fill=as.factor(VCF0004),VCF0232)) +
+ggplot(anes, aes(color=as.factor(year), fill=as.factor(year),ft)) +
   geom_density(alpha = 0.1)
 
-ggplot(anes,aes(x=VCF0232,fill=as.factor(VCF0004)))+
+ggplot(anes,aes(x=ft,fill=as.factor(year)))+
   geom_histogram(aes(y=0.5*..density..),
                  alpha=0.5,position='identity',binwidth=10)
 ```
 
-## Description: Attitudes by Ethnicity
-```{r}
-# All Ethnic Groups
-with(anes, summary(VCF0232))
-with(anes, boxplot(VCF0232))
-with(anes, hist(VCF0232))
+## Attitudes by Ethnicity (Black/~Black)
+__Then do the same for Whites and African Americans separately.__
 
-# Separate Ethnic Groups
-with(subset(anes, anes$VCF0105B=="(1) 1. White non-Hispanic"), summary(VCF0232))
-with(subset(anes, anes$VCF0105B=="(2) 2. Black non-Hispanic"), summary(VCF0232))
+This is the portion of the assignment where you'll do this youself. Generate descriptive statistics and figures below using the code in the previous section as an example. Remember that we recoded ethnicity to indicate whether the respondent is black.  
 
-# Boxplot
+```{r, eval = F}
+# Central Tendency (All Ethnic Groups)
+# summary(anes$????)
+
+# Central Tendency (Separate Ethnic Groups)
+# with(subset(anes, black==?), summary(ft))
+
+# table(anes$VCF0105B)
+# with(subset(anes, VCF0105B=="(1) 1. White non-Hispanic"), summary(ft))
+# with(subset(anes, VCF0105B=="(2) 2. Black non-Hispanic"), summary(ft))
+# with(subset(anes, VCF0105B=="(3) 3. Hispanic"), summary(ft))
+# with(subset(anes, VCF0105B=="(4) 4. Other or multiple races, non-Hispanic"), summary(ft))
+
+
+# Boxplot for Black/~Black
 require(ggplot2)
-ggplot(anes, aes(as.factor(VCF0105B), VCF0232)) +
-  geom_boxplot() + 
-  ylab("Gay/Lesbian Feeling Thermometer") + 
-  xlab("Year")
+# Here's a start
+# ggplot(subset(anes, !is.na(black)), aes(as.factor(black), ft)) +
 
-# Histogram
-with(subset(anes, VCF0105B=="(1) 1. White non-Hispanic"), hist(VCF0232))
-with(subset(anes, VCF0105B=="(2) 2. Black non-Hispanic"), hist(VCF0232))
+# Histogram and/or density plot
 
-ggplot(anes,aes(x=VCF0232,fill=as.factor(VCF0105B)))+
-  geom_histogram(aes(y=0.5*..density..),
-                 alpha=0.5,position='identity',binwidth=10)
-
-# ggplot(anes,aes(x=VCF0232,fill=as.factor(VCF0105B)))+
-#   geom_histogram(aes(y=0.5*..density..),binwidth=0.5)+
-#   facet_wrap(~as.factor(VCF0105B),nrow=4)
-
-# Density
-ggplot(anes, aes(color=as.factor(VCF0105B), fill=as.factor(VCF0105B),VCF0232)) +
-  geom_density(alpha = 0.1)
 ```
 
+How do attitudes towards gays and lesbians vary accross ethnic groups?  
+
+# Control Through Cross-Tabs
+How did time affect attitudes towards homosexuality? Does ethnicity also have a relationship? Does there seem to be a relationship between ethnicity and attitudes?  
+
+Formulate a hypothesis and write it down here. We'll test these by building some crosstables or crosstabs.  
+
+## Recode Feeling Thermometer 
+Let's recode the ft variable so that it simply reflects if a person responds with approval or disapproval. We'll set the cutoff at 50 for this distinction. 
+
+```{r}
+anes$ftGay <- as.numeric(anes$ft>50)
+table(anes$ftGay)
+```
+
+Why did we do this? Well, here's one reason. Try this yourself -- output not printed here. 
+
+```{r, eval=F}
+table(anes$ft)
+```
+
+## Cross Tab (Two Variables)  
+What's in a crosstab?  
+```{r}
+approvalByEthnicity <- table(anes$black, anes$ftGay)
+dimnames(approvalByEthnicity) = list(
+  black=c("black", "not black"),
+  ftGay=c("approve", "not approve"))
+prop.table(approvalByEthnicity, margin = 1)
+```
+Evaluating significance
+```{r}
+chisq.test(approvalByEthnicity)
+```
+
+## 
+```{r}
+# 3-Way Frequency Table
+mytable <- xtabs(~religion+ftGay+black, data=anes)
+dimnames(mytable) = list(
+  black=c("black", "not black"),
+  ftGay=c("approve", "not approve"),
+  religion=c("high", "low"))
+margin.table(mytable, margin = c(1:3))
+prop.table(mytable, margin = 1)
+summary(mytable) # chi-square test of indepedence
+```
+
+
+# Other Tests 
