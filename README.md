@@ -11,6 +11,9 @@ For example:
 ## PS531 - Quant II
 [Explorations for PS531](ps531/) - Find a copy of the exploration, comments, and other resources here.  
 
+## Workshop Links
+[Descriptive Statistics](https://htmlpreview.github.io/?https://github.com/bowers-grad-stats-illinois/uips-stat-share/blob/master/workshops-tutorials/descriptive-statistics/descriptive-stat-present.html)
+
 ## Workshops and Tutorials
 *__Aug 26__ - Basic Markdown for reproducible research and using git for classwork and assignments  
 *__Sept 2__ - APSA weekend. Send questions via email and/or work together. There is also the [**ATLAS** lab][atlas], which staffs a help desk for R and other stats/programming-related issues. David Bowden is a PhD student in Political Science who currently works there.  
